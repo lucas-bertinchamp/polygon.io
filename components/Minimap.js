@@ -1,10 +1,10 @@
 import React from "react";
 import styles from "@/styles/Minimap.module.css";
 
-const Minimap = ({ playerPosition, objects }) => {
+const Minimap = ({ player, objects }) => {
     return (
         <div className={styles.minimap}>
-            <div className={styles.player} style={playerPosition}></div>
+            <div className={styles.player} style={player}></div>
             {objects.map((object) => (
                 <div
                     key={object.id}
