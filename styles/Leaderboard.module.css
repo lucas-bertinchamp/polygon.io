@@ -5,12 +5,13 @@
     margin: 10px;
     padding: 10px;
     border: 1px solid #ccc;
-    width: 200px;
+    width: 150px;
     background-color: rgba(204, 204, 204, 0.3);
     border-radius: 2px;
 }
 
 .leaderboard h2 {
+    font-size: 1.1rem;
     margin-bottom: 1rem;
     font-weight: 900;
     text-align: center;
@@ -23,6 +24,7 @@
 }
 
 .leaderboard li {
+    font-size: 0.8rem;
     display: flex;
     align-items: center;
     margin-bottom: 0.3rem;

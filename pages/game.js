@@ -5,6 +5,7 @@ import styles from "@/styles/Game.module.css";
 import Head from "next/head";
 import Minimap from "../components/Minimap";
 import Leaderboard from "../components/Leaderboard";
+import Chat from "../components/Chat";
 
 function Game() {
     // Get the player name and color from the URL
@@ -137,6 +138,7 @@ function Game() {
             <Minimap player={player} objects={objects} />
             <Bars barsData={barsData} />
             <Leaderboard testLeaderboardData={testLeaderboardData} />
+            <Chat playerName={playerName} />
         </div>
     );
 }
