@@ -1,0 +1,28 @@
+.minimap {
+    position: absolute;
+    background-image: url("/sprites/map_contour.png");
+    background-size: 100% 100%;
+    top: 0;
+    right: 0;
+    margin: 10px;
+    width: 200px;
+    height: 200px;
+    background-color: rgba(204, 204, 204, 0.3);
+    border-radius: 2px;
+}
+
+.player {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.object {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: blue;
+    border-radius: 50%;
+}

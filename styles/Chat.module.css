@@ -1,0 +1,29 @@
+.chat {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 250px;
+    max-height: 250px;
+    background-color: rgba(204, 204, 204, 0.3);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    overflow-y: auto;
+    overflow-wrap: break-word;
+}
+
+.chat div {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.chat form {
+    display: flex;
+}
+
+.chat input[type="text"] {
+    flex-grow: 1;
+    padding: 5px;
+    max-width: 100%;
+    width: auto;
+}
