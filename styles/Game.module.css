@@ -5,4 +5,10 @@
     background-size: cover;
     width: 100vw;
     height: 100vh;
+
+    /* Flexbox the elements that is going to be deleted */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
