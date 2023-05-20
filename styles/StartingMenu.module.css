@@ -1,0 +1,113 @@
+.background {
+    background-color: #eee;
+    background-image: url("/background.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
+}
+
+.starting_menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    background-color: #f1f1f1;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.starting_menu h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 900;
+}
+
+.starting_menu form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.inputContainer {
+    display: flex;
+    align-items: center;
+    margin-top: 0.2rem;
+}
+
+.randomButton {
+    background-color: #0071ff;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0.4rem;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: "Montserrat", sans-serif;
+}
+
+.starting_menu input[type="text"] {
+    margin-right: 5px;
+    padding: 0.5rem;
+    width: 160px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    font-family: "Montserrat", sans-serif;
+    text-align: center;
+    border: none;
+    outline: none;
+}
+
+.starting_menu input[type="text"]:focus {
+    outline: none;
+}
+
+.starting_menu input[type="color"] {
+    width: 240px;
+    margin-bottom: 1rem;
+    padding: 0;
+    appearance: none;
+    border: none;
+    height: 32px;
+    cursor: pointer;
+    background: none;
+}
+
+.starting_menu input[type="color"]::-webkit-color-swatch {
+    border: none;
+    padding: 0;
+}
+
+.starting_menu input[type="color"]::-moz-color-swatch {
+    border: none;
+    padding: 0;
+}
+
+.starting_menu input[type="color"]::-ms-color-swatch {
+    border: none;
+    padding: 0;
+}
+
+.starting_menu button:hover {
+    background-color: #45a049;
+}
+
+.playButton {
+    padding: 0.5rem 1rem;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: "Montserrat", sans-serif;
+    border-radius: 4px;
+}
