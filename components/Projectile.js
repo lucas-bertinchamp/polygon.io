@@ -1,6 +1,6 @@
 import * as PIXI from "pixi.js";
 
-export function Projectile (dX, dY, speed, color, dmgValue) {
+const Projectile  = (dX, dY, speed, color, dmgValue)  => {
     const missile_Sprite = PIXI.Sprite.from(
         "sprites/bullet.png"
       );
@@ -17,3 +17,5 @@ export function Projectile (dX, dY, speed, color, dmgValue) {
         speed_y: dY*speed,
     };
 };
+
+export default Projectile;

@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js";
 import XpBubble from "./XpBubble";
 import LifeBubble from "./LifeBubble";
 import Player from "./Player";
-import { Projectile } from "./Projectile";
+import Projectile from "./Projectile";
 
 const PixiComponent = () => {
   const worldWidth = 1000;
