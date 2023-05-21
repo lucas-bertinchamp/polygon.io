@@ -148,10 +148,7 @@ const PixiComponent = ({ gameData }) => {
                     xpBubbles.splice(xpBubbles.indexOf(bubble), 1);
                     player.xpValue += bubble.xpValue;
                     // update the bar
-                    barsUtils.setBarValue(
-                        2,
-                        barsUtils.getBarValue(2) + bubble.xpValue
-                    );
+                    barsUtils.setBarValue(2, player.xpValue);
                 }
             });
 

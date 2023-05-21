@@ -26,16 +26,6 @@ const BarsUtils = () => {
         );
     };
 
-    const getBarValue = (barId) => {
-        const bar = barsDataRef.current.find((bar) => bar.id === barId);
-        return bar.value;
-    };
-
-    const getBarMaxValue = (barId) => {
-        const bar = barsDataRef.current.find((bar) => bar.id === barId);
-        return bar.maxValue;
-    };
-
     const setBarName = (barId, newName) => {
         setBarsData((prevBarsData) =>
             prevBarsData.map((bar) =>
@@ -48,8 +38,6 @@ const BarsUtils = () => {
         barsData,
         setBarValue,
         setBarMaxValue,
-        getBarValue,
-        getBarMaxValue,
         setBarName,
     };
 };
