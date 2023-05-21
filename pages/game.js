@@ -29,15 +29,24 @@ function Game() {
         };
     }, [router]);
 
-    let playerName = sessionStorage.getItem("playerName");
-    let playerColor = sessionStorage.getItem("playerColor");
-    let gameData = { playerName: playerName, playerColor: playerColor };
+    let storedPlayerName = "";
+    let storedPlayerColor = "";
+
+    if (typeof sessionStorage !== "undefined") {
+        storedPlayerName = sessionStorage.getItem("playerName");
+        storedPlayerColor = sessionStorage.getItem("playerColor");
+    }
+
+    let gameData = {
+        playerName: storedPlayerName,
+        playerColor: storedPlayerColor,
+    };
 
     // Minimap data
     const [player, setPlayer] = useState({
         top: "50%",
         left: "50%",
-        backgroundColor: playerColor,
+        backgroundColor: storedPlayerName,
     });
     const [objects, setObjects] = useState([
         {
@@ -61,7 +70,7 @@ function Game() {
         { id: 1, playerName: "Elie", score: 10000 },
         { id: 2, playerName: "John", score: 80 },
         { id: 3, playerName: "Laulau2", score: 120 },
-        { id: 4, playerName: playerName, score: 0 },
+        { id: 4, playerName: storedPlayerName, score: 0 },
         { id: 5, playerName: "Laulau1", score: 666 },
         { id: 6, playerName: "Laulau4", score: 777 },
         { id: 7, playerName: "Laulau3", score: -4 },
@@ -74,7 +83,7 @@ function Game() {
     return (
         <div className={styles.container}>
             <Head>
-                <title>{playerName} in polygon.io</title>
+                <title>{storedPlayerName} in polygon.io</title>
                 <meta
                     name="description"
                     content="For the Advanced Software Engineering class"
@@ -99,7 +108,7 @@ function Game() {
             <PixiComponent gameData={gameData} />
             <Minimap player={player} objects={objects} />
             <Leaderboard testLeaderboardData={testLeaderboardData} />
-            <Chat playerName={playerName} />
+            <Chat playerName={storedPlayerName} />
         </div>
     );
 }
