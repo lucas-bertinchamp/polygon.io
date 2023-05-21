@@ -51,14 +51,14 @@ const PixiComponent = () => {
     window.onclick = (e) => {
       if (Player.level > 1) {
         //theta = e(2i*pi/Player.level)
-        theta = Math.complex({ r: 1, phi: 2*Math.PI/Player.level})
+        theta = 2*Math.PI/Player.level
         for (let i = 0; i < Player.level; i++) {
-          z_0 = math.complex(0,1)
+          theta_0 = Math.PI/2
           if (Player.level %2 == 1) {
-            z_0 = math.multiply(z_0,theta.pow(1/2))
-          }  
-          dx = math.multiply(z_0, theta.pow(i)).re
-          dy = math.multiply(z_0, theta.pow(i)).im
+            theta_0 += theta/2
+          }
+          dx = Math.cos(theta_0+(theta*i))
+          dy = Math.sin(theta_0+(theta*i))
           radius = Player.sprite.height / 2;
           const missile = Projectile(dx, dy,10, Player.color, 1);
           missile.sprite.x = Player.sprite.x + radius * dx;
