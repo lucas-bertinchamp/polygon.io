@@ -164,6 +164,7 @@ const PixiComponent = ({ gameData }) => {
                     app.stage.removeChild(bubble.sprite);
                     lifeBubbles.splice(lifeBubbles.indexOf(bubble), 1);
                     player.health += bubble.lifeValue;
+                    // change the health bar
                     if (
                         barsUtils.getBarValue(1) + bubble.lifeValue <
                         barsUtils.getBarMaxValue(1)
@@ -291,11 +292,13 @@ const PixiComponent = ({ gameData }) => {
             missiles.forEach((missile) => {
                 const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
                 const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
-
                 if (distX < 45 && distY < 45) {
+                    console.log(distX, distY);
                     app.stage.removeChild(missile.sprite);
-                    missiles.splice(missiles.indexOf(missile), 1);
                     player.health -= missile.damage;
+                    missiles.splice(missiles.indexOf(missile), 1);
+                    // change the health bar
+                    barsUtils.setBarValue(1, player.health);
                 }
             });
 
