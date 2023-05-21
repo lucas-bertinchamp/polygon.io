@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 
 const BarsUtils = () => {
     const [barsData, setBarsData] = useState([
-        { id: 1, value: 100, maxValue: 100, color: "red", name: "HP" },
+        { id: 1, value: 20, maxValue: 100, color: "red", name: "HP" },
         { id: 2, value: 0, maxValue: 10, color: "green", name: "XP 1" },
         { id: 3, value: 5, maxValue: 5, color: "yellow", name: "Ammo" },
     ]);
@@ -10,33 +10,30 @@ const BarsUtils = () => {
     const barsDataRef = useRef(barsData);
     barsDataRef.current = barsData;
 
-    const addBarValue = (barId, addedValue) => {
+    const setBarValue = (barId, newValue) => {
         setBarsData((prevBarsData) =>
             prevBarsData.map((bar) =>
-                bar.id === barId
-                    ? { ...bar, value: bar.value + addedValue }
-                    : bar
+                bar.id === barId ? { ...bar, value: newValue } : bar
             )
         );
     };
 
-    const addBarMaxValue = (barId, addedMaxValue) => {
+    const setBarMaxValue = (barId, newMaxValue) => {
         setBarsData((prevBarsData) =>
             prevBarsData.map((bar) =>
-                bar.id === barId
-                    ? { ...bar, maxValue: bar.maxValue + addedMaxValue }
-                    : bar
+                bar.id === barId ? { ...bar, maxValue: newMaxValue } : bar
             )
         );
     };
 
     const getBarValue = (barId) => {
-        console.log(
-            "getBarValue",
-            barsDataRef.current.find((bar) => bar.id === barId).value
-        );
         const bar = barsDataRef.current.find((bar) => bar.id === barId);
         return bar.value;
+    };
+
+    const getBarMaxValue = (barId) => {
+        const bar = barsDataRef.current.find((bar) => bar.id === barId);
+        return bar.maxValue;
     };
 
     const setBarName = (barId, newName) => {
@@ -47,7 +44,14 @@ const BarsUtils = () => {
         );
     };
 
-    return { barsData, addBarValue, addBarMaxValue, getBarValue, setBarName };
+    return {
+        barsData,
+        setBarValue,
+        setBarMaxValue,
+        getBarValue,
+        getBarMaxValue,
+        setBarName,
+    };
 };
 
 export default BarsUtils;

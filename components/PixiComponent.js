@@ -17,6 +17,7 @@ const PixiComponent = () => {
     const nLifeBubble = 4;
     const pixiContainerRef = useRef(null);
     const xpNeeded = [0, 10, 20, 40, 80, 160];
+    const healthByLevel = [100, 120, 140, 160, 180, 200];
 
     const mousePos = { x: 0, y: 0 };
 
@@ -106,13 +107,10 @@ const PixiComponent = () => {
                     xpBubbles.splice(xpBubbles.indexOf(bubble), 1);
                     player.xpValue += bubble.xpValue;
                     // update the bar
-                    barsUtils.addBarValue(2, bubble.xpValue);
-                    if (player.xpValue >= xpNeeded[player.level]) {
-                        barsUtils.addBarMaxValue(2, xpNeeded[player.level]);
-                        barsUtils.addBarValue(2, -xpNeeded[player.level]);
-                        let tempLevel = player.level + 1;
-                        barsUtils.setBarName(2, "XP " + tempLevel);
-                    }
+                    barsUtils.setBarValue(
+                        2,
+                        barsUtils.getBarValue(2) + bubble.xpValue
+                    );
                 }
             });
 
@@ -125,6 +123,15 @@ const PixiComponent = () => {
                     app.stage.removeChild(bubble.sprite);
                     lifeBubbles.splice(lifeBubbles.indexOf(bubble), 1);
                     player.health += bubble.lifeValue;
+                    if (
+                        barsUtils.getBarValue(1) + bubble.lifeValue <
+                        barsUtils.getBarMaxValue(1)
+                    )
+                        barsUtils.setBarValue(
+                            1,
+                            barsUtils.getBarValue(1) + bubble.lifeValue
+                        );
+                    else barsUtils.setBarValue(1, barsUtils.getBarMaxValue(1));
                 }
             });
 
@@ -141,6 +148,23 @@ const PixiComponent = () => {
                     player.health
                 );
                 app.stage.addChild(player.sprite);
+                // si evolution : changer les valeurs maximales des barres
+                barsUtils.setBarMaxValue(1, healthByLevel[player.level - 1]);
+                barsUtils.setBarMaxValue(
+                    2,
+                    barsUtils.getBarMaxValue(2) + xpNeeded[player.level - 1]
+                );
+                // heal the player with the amount the level up gave him
+                barsUtils.setBarValue(
+                    1,
+                    barsUtils.getBarValue(1) +
+                        healthByLevel[player.level - 1] -
+                        healthByLevel[player.level - 2]
+                );
+                // remettre la barre d'XP à 0
+                barsUtils.setBarValue(2, 0);
+                // changer le nom de la barre d'XP
+                barsUtils.setBarName(2, "XP " + player.level);
             }
 
             //Enlever toutes les bulles
