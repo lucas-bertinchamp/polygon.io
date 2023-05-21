@@ -51,7 +51,7 @@ const StartingMenu = () => {
     }
 
     const renderPlayLink = () => {
-        if (playerName) {
+        if (playerName && playerColor !== "#bf91bb") {
             return (
                 <Link href={"/game"}>
                     <button className={styles.playButton}>Play</button>
