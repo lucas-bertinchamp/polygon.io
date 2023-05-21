@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 import XpBubble from "./XpBubble";
 import LifeBubble from "./LifeBubble";
 import Player from "./Player";
+import Projectile from "./Projectile";
 import Bars from "./Bars";
 import BarsUtils from "./utils/BarsUtils";
 
@@ -46,6 +47,10 @@ const PixiComponent = ({ gameData }) => {
             100
         );
         app.stage.addChild(player.sprite);
+      
+      
+        // Créer des missiles
+        const missiles = []
 
         // Create playerName text
         const playerNameText = new PIXI.Text(playerName, {
@@ -59,6 +64,28 @@ const PixiComponent = ({ gameData }) => {
         window.onmousemove = (e) => {
             mousePos.x = e.clientX;
             mousePos.y = e.clientY;
+        };
+      
+        // Evenement déclenché si on clique
+        window.onclick = (e) => {
+          if (Player.level > 1) {
+            theta = 2*Math.PI/Player.level
+            for (let i = 0; i < Player.level; i++) {
+              theta_0 = Math.PI/2
+              if (Player.level %2 == 1) {
+                theta_0 += theta/2
+              }
+              dx = Math.cos(theta_0+(theta*i))
+              dy = Math.sin(theta_0+(theta*i))
+              radius = Player.sprite.height / 2;
+              const missile = Projectile(dx, dy,10, Player.color, 1);
+              missile.sprite.x = Player.sprite.x + radius * dx;
+              missile.sprite.y = Player.sprite.y + radius * dy;
+              missile.worldPos.x = Player.worldPos.x + radius * dx;
+              missile.worldPos.y = Player.worldPos.y + radius * dy;
+              missiles.push(missile);
+            }
+          }
         };
 
         // Créer des bulles d'expérience
@@ -217,6 +244,49 @@ const PixiComponent = ({ gameData }) => {
                     app.stage.addChild(bubble.sprite);
                 }
             });
+        });
+      
+        //Enlever les missiles
+        missiles.forEach((missile) => {
+          app.stage.removeChild(missile.sprite);
+        });
+
+        // Deplacer les missiles
+        missiles.forEach((missile) => {
+          missile.worldPos.x += missile.speed.x;
+          missile.worldPos.y += missile.speed.y;
+
+          const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
+          const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
+
+          if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
+            missile.sprite.x =
+              player.sprite.x + missile.worldPos.x - player.worldPos.x;
+            missile.sprite.y =
+              player.sprite.y + missile.worldPos.y - player.worldPos.y;
+          } else {
+            missile.sprite.x = null;
+            missile.sprite.y = null;
+          }
+        });
+
+        // vérifier si le joueur est touché par un missile
+        missiles.forEach((missile) => {
+          const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
+          const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
+
+          if (distX < 45 && distY < 45) {
+            app.stage.removeChild(missile.sprite);
+            missiles.splice(missiles.indexOf(missile), 1);
+            player.health -= missile.damage;
+          }
+        });
+
+        // Remettre les missiles assez proches du joueur
+        missiles.forEach((missile) => {
+          if (missile.sprite.x !== null && missile.sprite.y !== null) {
+            app.stage.addChild(missile.sprite);
+          }
         });
 
         // Nettoyez l'application PIXI lorsque le composant est démonté
