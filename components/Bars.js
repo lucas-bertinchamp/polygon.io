@@ -3,7 +3,6 @@ import styles from "@/styles/Bars.module.css";
 
 const Bars = ({ barsData }) => {
     useEffect(() => {
-        // Update the bar animation whenever the value changes
         updateBars();
     }, [barsData]);
 

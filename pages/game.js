@@ -6,13 +6,14 @@ import Head from "next/head";
 import Minimap from "../components/Minimap";
 import Leaderboard from "../components/Leaderboard";
 import Chat from "../components/Chat";
+import PixiComponent from "@/components/PixiComponent";
 
 function Game() {
     // Get the player name and color from the URL
     const router = useRouter();
     const { playerName, playerColor } = router.query;
 
-    // Bars data
+    /* // Bars data
     const [barsData, setBarsData] = useState([
         { id: 1, value: 80, maxValue: 100, color: "red", name: "HP" },
         { id: 2, value: 60, maxValue: 100, color: "green", name: "XP" },
@@ -27,7 +28,7 @@ function Game() {
                     : bar
             )
         );
-    };
+    }; */
 
     // Minimap data
     const [player, setPlayer] = useState({
@@ -91,52 +92,9 @@ function Game() {
                     rel="stylesheet"
                 />
             </Head>
-            <h1>
-                Welcome to the Game Page, <u>{playerName}</u>!
-            </h1>
-            <h1>
-                Your color is <u>{playerColor}</u>!
-            </h1>
-            <br />
-            <span>Just some buttons to update the bars:</span>
-            <br />
-            <button onClick={() => updateBarValue(1, 1)}>
-                Increase Bar 1 by 1
-            </button>
-            <button onClick={() => updateBarValue(2, 1)}>
-                Increase Bar 2 by 1
-            </button>
-            <button onClick={() => updateBarValue(3, 1)}>
-                Increase Bar 3 by 1
-            </button>
-            <br />
-            <button onClick={() => updateBarValue(1, -1)}>
-                Decrease Bar 1 by 1
-            </button>
-            <button onClick={() => updateBarValue(2, -1)}>
-                Decrease Bar 2 by 1
-            </button>
-            <button onClick={() => updateBarValue(3, -1)}>
-                Decrease Bar 3 by 1
-            </button>
-            <br />
-            <button
-                onClick={() =>
-                    updateMinimap({
-                        top: `${Math.random() * 100}%`,
-                        left: `${Math.random() * 100}%`,
-                        backgroundColor: `rgb(${Math.floor(
-                            Math.random() * 256
-                        )}, ${Math.floor(Math.random() * 256)}, ${Math.floor(
-                            Math.random() * 256
-                        )})`,
-                    })
-                }
-            >
-                Random Player on Minimap
-            </button>
+
+            <PixiComponent />
             <Minimap player={player} objects={objects} />
-            <Bars barsData={barsData} />
             <Leaderboard testLeaderboardData={testLeaderboardData} />
             <Chat playerName={playerName} />
         </div>
