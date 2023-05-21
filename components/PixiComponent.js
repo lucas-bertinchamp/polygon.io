@@ -50,7 +50,6 @@ const PixiComponent = () => {
     // Evenement déclenché si on clique
     window.onclick = (e) => {
       if (Player.level > 1) {
-        //theta = e(2i*pi/Player.level)
         theta = 2*Math.PI/Player.level
         for (let i = 0; i < Player.level; i++) {
           theta_0 = Math.PI/2
