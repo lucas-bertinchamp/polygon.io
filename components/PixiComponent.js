@@ -6,9 +6,13 @@ import Player from "./Player";
 import Bars from "./Bars";
 import BarsUtils from "./utils/BarsUtils";
 
-const PixiComponent = () => {
+const PixiComponent = ({ gameData }) => {
     // interact with the bars
     let barsUtils = BarsUtils();
+
+    let playerName = gameData.playerName;
+    let playerColor = gameData.playerColor;
+    let playerColorCoded = playerColor.replace("#", "0x");
 
     const worldWidth = 1000;
     const worldHeight = 1000;
@@ -38,10 +42,18 @@ const PixiComponent = () => {
             0,
             0,
             1,
-            0x00ff00,
+            playerColorCoded,
             100
         );
         app.stage.addChild(player.sprite);
+
+        // Create playerName text
+        const playerNameText = new PIXI.Text(playerName, {
+            fill: 0x000000, // text color
+        });
+        playerNameText.anchor.set(0.5); // center the text
+        playerNameText.position.set(player.sprite.x, player.sprite.y - 55);
+        app.stage.addChild(playerNameText);
 
         // Evenement déclenché si la position de la souris change
         window.onmousemove = (e) => {
@@ -144,10 +156,13 @@ const PixiComponent = () => {
                     player.worldPos.x,
                     player.worldPos.y,
                     player.level + 1,
-                    0x00ff00,
+                    playerColorCoded,
                     player.health
                 );
                 app.stage.addChild(player.sprite);
+                // remettre le text du joueur devant
+                app.stage.addChild(playerNameText);
+
                 // si evolution : changer les valeurs maximales des barres
                 barsUtils.setBarMaxValue(1, healthByLevel[player.level - 1]);
                 barsUtils.setBarMaxValue(
@@ -206,6 +221,8 @@ const PixiComponent = () => {
 
         // Nettoyez l'application PIXI lorsque le composant est démonté
         return () => {
+            app.stage.removeChild(player.sprite);
+            app.stage.removeChild(playerNameText);
             pixiContainer.removeChild(app.view);
             app.destroy();
         };

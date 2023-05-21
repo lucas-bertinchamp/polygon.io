@@ -1,34 +1,37 @@
-import { useRouter } from "next/router";
-import Bars from "../components/Bars";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "@/styles/Game.module.css";
 import Head from "next/head";
 import Minimap from "../components/Minimap";
 import Leaderboard from "../components/Leaderboard";
 import Chat from "../components/Chat";
 import PixiComponent from "@/components/PixiComponent";
+import { useRouter } from "next/dist/client/router";
 
 function Game() {
-    // Get the player name and color from the URL
     const router = useRouter();
-    const { playerName, playerColor } = router.query;
+    useEffect(() => {
+        const handleKeyPress = (event) => {
+            // Check if the F5 key is pressed
+            if (event.key === "F5") {
+                // Prevent the default browser refresh behavior
+                event.preventDefault();
 
-    /* // Bars data
-    const [barsData, setBarsData] = useState([
-        { id: 1, value: 80, maxValue: 100, color: "red", name: "HP" },
-        { id: 2, value: 60, maxValue: 100, color: "green", name: "XP" },
-        { id: 3, value: 1, maxValue: 5, color: "yellow", name: "Ammo" },
-    ]);
+                // Redirect to the "/" path (home page)
+                router.push("/");
+            }
+        };
+        // Add event listener for keydown event
+        window.addEventListener("keydown", handleKeyPress);
 
-    const updateBarValue = (barId, toAddValue) => {
-        setBarsData((prevBarsData) =>
-            prevBarsData.map((bar) =>
-                bar.id === barId
-                    ? { ...bar, value: bar.value + toAddValue }
-                    : bar
-            )
-        );
-    }; */
+        // Clean up the event listener when the component unmounts
+        return () => {
+            window.removeEventListener("keydown", handleKeyPress);
+        };
+    }, [router]);
+
+    let playerName = localStorage.getItem("playerName");
+    let playerColor = localStorage.getItem("playerColor");
+    let gameData = { playerName: playerName, playerColor: playerColor };
 
     // Minimap data
     const [player, setPlayer] = useState({
@@ -93,7 +96,7 @@ function Game() {
                 />
             </Head>
 
-            <PixiComponent />
+            <PixiComponent gameData={gameData} />
             <Minimap player={player} objects={objects} />
             <Leaderboard testLeaderboardData={testLeaderboardData} />
             <Chat playerName={playerName} />

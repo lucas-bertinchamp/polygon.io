@@ -1,6 +1,6 @@
 import styles from "@/styles/StartingMenu.module.css";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 const StartingMenu = () => {
@@ -12,12 +12,14 @@ const StartingMenu = () => {
         // Handle form submission or other logic
     };
 
-    const handleInputChange = (e) => {
+    const handleNameChange = (e) => {
         setPlayerName(e.target.value);
+        localStorage.setItem("playerName", e.target.value);
     };
 
     const handleColorChange = (e) => {
         setPlayerColor(e.target.value);
+        localStorage.setItem("playerColor", e.target.value);
     };
 
     function generateRandomNickname() {
@@ -50,11 +52,8 @@ const StartingMenu = () => {
 
     const renderPlayLink = () => {
         if (playerName) {
-            const encodedColor = encodeURIComponent(playerColor);
             return (
-                <Link
-                    href={`/game?playerName=${playerName}&playerColor=${encodedColor}`}
-                >
+                <Link href={"/game"}>
                     <button className={styles.playButton}>Play</button>
                 </Link>
             );
@@ -80,7 +79,7 @@ const StartingMenu = () => {
                         <input
                             type="text"
                             value={playerName}
-                            onChange={handleInputChange}
+                            onChange={handleNameChange}
                             title="Enter Your Nickname"
                         />
                         <button
