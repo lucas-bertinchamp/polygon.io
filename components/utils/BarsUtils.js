@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 
 const BarsUtils = () => {
     const [barsData, setBarsData] = useState([
-        { id: 1, value: 20, maxValue: 100, color: "red", name: "HP" },
+        { id: 1, value: 100, maxValue: 100, color: "red", name: "HP" },
         { id: 2, value: 0, maxValue: 10, color: "green", name: "XP 1" },
         { id: 3, value: 5, maxValue: 5, color: "yellow", name: "Ammo" },
     ]);

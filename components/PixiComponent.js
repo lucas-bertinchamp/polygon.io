@@ -18,11 +18,11 @@ const PixiComponent = ({ gameData }) => {
     const worldWidth = 1000;
     const worldHeight = 1000;
 
-    const nXpBubble = 100;
+    const nXpBubble = 20;
     const nLifeBubble = 4;
     const pixiContainerRef = useRef(null);
-    const xpNeeded = [0, 10, 20, 40, 80, 160];
-    const healthByLevel = [100, 120, 140, 160, 180, 200];
+    const xpNeeded = [0, 10, 20, 40, 80, 160, 100000]; // 0 to start at index 1 for level 1
+    const healthByLevel = [0, 100, 120, 140, 160, 180, 200]; // 0 to start at index 1 for level 1
 
     const mousePos = { x: 0, y: 0 };
 
@@ -44,7 +44,7 @@ const PixiComponent = ({ gameData }) => {
             0,
             1,
             playerColorCoded,
-            100
+            healthByLevel[1]
         );
         app.stage.addChild(player.sprite);
 
@@ -163,17 +163,20 @@ const PixiComponent = ({ gameData }) => {
                 if (distX < 45 && distY < 45) {
                     app.stage.removeChild(bubble.sprite);
                     lifeBubbles.splice(lifeBubbles.indexOf(bubble), 1);
-                    player.health += bubble.lifeValue;
-                    // change the health bar
+                    // change the health bar and the value of the player's health
                     if (
-                        barsUtils.getBarValue(1) + bubble.lifeValue <
-                        barsUtils.getBarMaxValue(1)
-                    )
+                        player.health + bubble.lifeValue <
+                        healthByLevel[player.level]
+                    ) {
                         barsUtils.setBarValue(
                             1,
-                            barsUtils.getBarValue(1) + bubble.lifeValue
+                            player.health + bubble.lifeValue
                         );
-                    else barsUtils.setBarValue(1, barsUtils.getBarMaxValue(1));
+                        player.health += bubble.lifeValue;
+                    } else {
+                        barsUtils.setBarValue(1, healthByLevel[player.level]);
+                        player.health = healthByLevel[player.level];
+                    }
                 }
             });
 
@@ -189,23 +192,23 @@ const PixiComponent = ({ gameData }) => {
                     playerColorCoded,
                     player.health
                 );
+                if (player.level >= 1) {
+                    player.health +=
+                        healthByLevel[player.level] -
+                        healthByLevel[player.level - 1];
+                } else {
+                    // should never happen
+                    console.log("level 0");
+                }
                 app.stage.addChild(player.sprite);
                 // remettre le text du joueur devant
                 app.stage.addChild(playerNameText);
 
                 // si evolution : changer les valeurs maximales des barres
-                barsUtils.setBarMaxValue(1, healthByLevel[player.level - 1]);
-                barsUtils.setBarMaxValue(
-                    2,
-                    barsUtils.getBarMaxValue(2) + xpNeeded[player.level - 1]
-                );
+                barsUtils.setBarMaxValue(1, healthByLevel[player.level]);
+                barsUtils.setBarMaxValue(2, xpNeeded[player.level]);
                 // heal the player with the amount the level up gave him
-                barsUtils.setBarValue(
-                    1,
-                    barsUtils.getBarValue(1) +
-                        healthByLevel[player.level - 1] -
-                        healthByLevel[player.level - 2]
-                );
+                barsUtils.setBarValue(1, player.health);
                 // remettre la barre d'XP à 0
                 barsUtils.setBarValue(2, 0);
                 // changer le nom de la barre d'XP
@@ -293,6 +296,7 @@ const PixiComponent = ({ gameData }) => {
                 const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
                 const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
                 if (distX < 45 && distY < 45) {
+                    // augmenter les valeurs de comparaison avec distX et distY pour tester la suite (45 = valeurs de base)
                     app.stage.removeChild(missile.sprite);
                     player.health -= missile.dmgValue;
                     missiles.splice(missiles.indexOf(missile), 1);
@@ -301,6 +305,9 @@ const PixiComponent = ({ gameData }) => {
                     // if the player is dead
                     if (player.health <= 0) {
                         app.stage.removeChild(player.sprite);
+                        if (player.level === 1) {
+                            player.level = 2; // si le joueur meurt au niveau 1, il passe au niveau 2 pour qu'il revienne au niveau 1
+                        }
                         player = Player(
                             app.screen.width / 2,
                             app.screen.height / 2,
@@ -308,33 +315,27 @@ const PixiComponent = ({ gameData }) => {
                             player.worldPos.y,
                             player.level - 1,
                             playerColorCoded,
-                            healthByLevel[player.level - 2]
+                            healthByLevel[player.level - 1]
                         );
                         app.stage.addChild(player.sprite);
                         // remettre le text du joueur devant
                         app.stage.addChild(playerNameText);
 
-                        // si evolution : changer les valeurs maximales des barres
+                        // on change les max des bars au niveau en dessous
                         barsUtils.setBarMaxValue(
                             1,
-                            healthByLevel[player.level - 2]
+                            healthByLevel[player.level]
                         );
-                        barsUtils.setBarMaxValue(
-                            2,
-                            barsUtils.getBarMaxValue(2) +
-                                xpNeeded[player.level - 2]
-                        );
-                        // heal the player with the amount the level up gave him
-                        barsUtils.setBarValue(
-                            1,
-                            barsUtils.getBarValue(1) +
-                                healthByLevel[player.level - 1] -
-                                healthByLevel[player.level - 2]
-                        );
+                        barsUtils.setBarMaxValue(2, xpNeeded[player.level]);
+                        // remettre la barre de vie à 100%
+                        barsUtils.setBarValue(1, healthByLevel[player.level]);
                         // remettre la barre d'XP à 0
                         barsUtils.setBarValue(2, 0);
                         // changer le nom de la barre d'XP
-                        barsUtils.setBarName(2, "XP " + player.level);
+                        barsUtils.setBarName(
+                            2,
+                            "XP " + parseInt(player.level).toString()
+                        );
                     }
                 }
             });
