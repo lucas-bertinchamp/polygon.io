@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google";
 import PixiComponent from "@/components/PixiComponent";
 import Head from "next/head";
-import { useEffect } from "react";
+//import { useEffect } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
