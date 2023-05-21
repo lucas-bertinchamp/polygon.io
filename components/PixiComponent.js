@@ -257,6 +257,15 @@ const PixiComponent = ({ gameData }) => {
                 missile.worldPos.x += missile.speed_x;
                 missile.worldPos.y += missile.speed_y;
 
+                if (
+                    missile.worldPos.x > worldWidth / 2 ||
+                    missile.worldPos.x < -worldWidth / 2 ||
+                    missile.worldPos.y > worldHeight / 2 ||
+                    missile.worldPos.y < -worldHeight / 2
+                ) {
+                    missiles.splice(missiles.indexOf(missile), 1);
+                }
+
                 const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
                 const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
 
