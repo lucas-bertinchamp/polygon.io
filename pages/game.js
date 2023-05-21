@@ -29,8 +29,8 @@ function Game() {
         };
     }, [router]);
 
-    let playerName = localStorage.getItem("playerName");
-    let playerColor = localStorage.getItem("playerColor");
+    let playerName = sessionStorage.getItem("playerName");
+    let playerColor = sessionStorage.getItem("playerColor");
     let gameData = { playerName: playerName, playerColor: playerColor };
 
     // Minimap data

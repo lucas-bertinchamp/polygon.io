@@ -317,12 +317,12 @@ const PixiComponent = ({ gameData }) => {
                         // si evolution : changer les valeurs maximales des barres
                         barsUtils.setBarMaxValue(
                             1,
-                            healthByLevel[player.level - 1]
+                            healthByLevel[player.level - 2]
                         );
                         barsUtils.setBarMaxValue(
                             2,
                             barsUtils.getBarMaxValue(2) +
-                                xpNeeded[player.level - 1]
+                                xpNeeded[player.level - 2]
                         );
                         // heal the player with the amount the level up gave him
                         barsUtils.setBarValue(

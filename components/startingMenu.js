@@ -5,7 +5,18 @@ import Link from "next/link";
 
 const StartingMenu = () => {
     const [playerName, setPlayerName] = useState("");
-    const [playerColor, setPlayerColor] = useState("#bf91bb"); // Initial color value
+    const [playerColor, setPlayerColor] = useState("");
+
+    useEffect(() => {
+        const storedPlayerName = sessionStorage.getItem("playerName");
+        const storedPlayerColor = sessionStorage.getItem("playerColor");
+        if (storedPlayerName) {
+            setPlayerName(storedPlayerName);
+        }
+        if (storedPlayerColor) {
+            setPlayerColor(storedPlayerColor);
+        }
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -14,12 +25,12 @@ const StartingMenu = () => {
 
     const handleNameChange = (e) => {
         setPlayerName(e.target.value);
-        localStorage.setItem("playerName", e.target.value);
+        sessionStorage.setItem("playerName", e.target.value);
     };
 
     const handleColorChange = (e) => {
         setPlayerColor(e.target.value);
-        localStorage.setItem("playerColor", e.target.value);
+        sessionStorage.setItem("playerColor", e.target.value);
     };
 
     function generateRandomNickname() {
@@ -51,7 +62,7 @@ const StartingMenu = () => {
     }
 
     const renderPlayLink = () => {
-        if (playerName && playerColor !== "#bf91bb") {
+        if (playerName && playerColor) {
             return (
                 <Link href={"/game"}>
                     <button className={styles.playButton}>Play</button>
