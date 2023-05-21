@@ -36,7 +36,7 @@ const Leaderboard = ({ testLeaderboardData }) => {
             <h2>Leaderboard</h2>
             <ul>
                 {leaderboardData.map((entry, index) => (
-                    <li key={entry.id}>
+                    <li key={entry.id} style={{ color: entry.color }}>
                         <span>{index + 1}. </span>
                         <span>{entry.playerName}</span>
                         <span>{entry.score}</span>

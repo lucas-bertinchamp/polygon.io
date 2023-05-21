@@ -6,6 +6,7 @@ import Player from "./Player";
 import Projectile from "./Projectile";
 import Bars from "./Bars";
 import BarsUtils from "./utils/BarsUtils";
+import Leaderboard from "./Leaderboard";
 
 const PixiComponent = ({ gameData }) => {
     // interact with the bars
@@ -14,6 +15,21 @@ const PixiComponent = ({ gameData }) => {
     let playerName = gameData.playerName;
     let playerColor = gameData.playerColor;
     let playerColorCoded = playerColor.replace("#", "0x");
+
+    // Leaderboard data (for testing, it should be fetched from the API)
+    let testLeaderboardData = [
+        { id: 1, playerName: "Elie", score: 10000, color: "red" },
+        { id: 2, playerName: "John", score: 80, color: "blue" },
+        { id: 3, playerName: "Laulau2", score: 120, color: "green" },
+        { id: 4, playerName: playerName, score: 0, color: playerColor },
+        { id: 5, playerName: "Laulau1", score: 666, color: "yellow" },
+        { id: 6, playerName: "Laulau4", score: 777, color: "purple" },
+        { id: 7, playerName: "Laulau3", score: -4 },
+        { id: 8, playerName: "Laulau5", score: 1 },
+        { id: 9, playerName: "Laulau6", score: 30 },
+        { id: 10, playerName: "Laulau7".slice(0, 13), score: 420 },
+        { id: 11, playerName: "DoitPasEtreAffiche".slice(0, 13), score: -420 },
+    ];
 
     const worldWidth = 1000;
     const worldHeight = 1000;
@@ -44,7 +60,8 @@ const PixiComponent = ({ gameData }) => {
             0,
             1,
             playerColorCoded,
-            healthByLevel[1]
+            healthByLevel[1],
+            0
         );
         app.stage.addChild(player.sprite);
 
@@ -149,6 +166,18 @@ const PixiComponent = ({ gameData }) => {
                     player.xpValue += bubble.xpValue;
                     // update the bar
                     barsUtils.setBarValue(2, player.xpValue);
+                    // update the player's xpTotal
+                    player.xpTotal += bubble.xpValue;
+
+                    // changer le score du player dans le leaderboard
+                    // trier le leaderboard : TODO : ça trie pas le leaderboard
+                    testLeaderboardData
+                        .map((p) => {
+                            if (p.playerName == playerName) {
+                                p.score = player.xpTotal;
+                            }
+                        })
+                        .sort((a, b) => b.score - a.score);
                 }
             });
 
@@ -187,7 +216,8 @@ const PixiComponent = ({ gameData }) => {
                     player.worldPos.y,
                     player.level + 1,
                     playerColorCoded,
-                    player.health
+                    player.health,
+                    player.xpTotal
                 );
                 if (player.level >= 1) {
                     player.health +=
@@ -312,7 +342,8 @@ const PixiComponent = ({ gameData }) => {
                             player.worldPos.y,
                             player.level - 1,
                             playerColorCoded,
-                            healthByLevel[player.level - 1]
+                            healthByLevel[player.level - 1],
+                            player.xpTotal - xpNeeded[player.level - 1]
                         );
                         app.stage.addChild(player.sprite);
                         // remettre le text du joueur devant
@@ -356,6 +387,7 @@ const PixiComponent = ({ gameData }) => {
     return (
         <div ref={pixiContainerRef}>
             <Bars barsData={barsUtils.barsData} />
+            <Leaderboard testLeaderboardData={testLeaderboardData} />
         </div>
     );
 };
