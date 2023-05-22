@@ -2,58 +2,41 @@ import { useState, useEffect } from "react";
 import styles from "@/styles/Game.module.css";
 import Head from "next/head";
 import Minimap from "../components/Minimap";
-import Leaderboard from "../components/Leaderboard";
 import Chat from "../components/Chat";
 import PixiComponent from "@/components/PixiComponent";
-import { useRouter } from "next/dist/client/router";
-import { Redis } from "ioredis";
-import XpBubble from "@/components/XpBubble";
 
-const redis = new Redis(process.env.REDIS_URL);
 
-/*
-export async function getServerSideProps() {
-  redis.del("xpBubble");
-  // True if server-side, false if client-side
-  console.log(typeof window === "undefined");
-  redis.hgetall("xpBubble").then((res) => {
-    let nXpBubble = Object.keys(res).length / 2;
-    if (nXpBubble < 10) {
-      let data = [];
-      for (let i = 0; i < 100 - nXpBubble; i++) {
-        let randomPosX = Math.floor(Math.random() * 1000 - 500);
-        let randomPosY = Math.floor(Math.random() * 1000 - 500);
-        let xpBubble = { worldPosX: randomPosX, worldPosY: randomPosY, xp: 5 };
-        redis.hset(
-          "xpBubble",
-          JSON.stringify(xpBubble.worldPosX) +
-            ";" +
-            JSON.stringify(xpBubble.worldPosY),
-          JSON.stringify(xpBubble)
-        );
-      }
-      redis.hmset("xpBubble", ...data);
+function Game() {
+    let storedPlayerName = "";
+    let storedPlayerColor = "";
+
+    if (typeof sessionStorage !== "undefined") {
+        storedPlayerName = sessionStorage.getItem("playerName");
+        storedPlayerColor = sessionStorage.getItem("playerColor");
     }
-  });
-  return { props: {} };
-}*/
 
-function Game(props) {
-  const router = useRouter();
-
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      // Check if the F5 key is pressed
-      if (event.key === "F5") {
-        // Prevent the default browser refresh behavior
-        event.preventDefault();
-
-        // Redirect to the "/" path (home page)
-        router.push("/");
-      }
+    let gameData = {
+        playerName: storedPlayerName,
+        playerColor: storedPlayerColor,
     };
-    // Add event listener for keydown event
-    window.addEventListener("keydown", handleKeyPress);
+
+    // Minimap data
+    const [player, setPlayer] = useState({
+        top: "50%",
+        left: "50%",
+        backgroundColor: storedPlayerName,
+    });
+    const [objects, setObjects] = useState([
+        {
+            id: 1,
+            position: { top: "30%", left: "40%", backgroundColor: "blue" },
+        },
+        {
+            id: 2,
+            position: { top: "60%", left: "70%", backgroundColor: "orange" },
+        },
+        // Add more objects as needed
+    ]);
 
     // Clean up the event listener when the component unmounts
     return () => {
@@ -88,45 +71,36 @@ function Game(props) {
     setObjects((prevData) => (newObjects ? newObjects : prevData));
   };
 
-  // Leaderboard data (for testing, it should be fetched from the API)
-  const testLeaderboardData = [
-    { id: 1, playerName: "Elie", score: 10000 },
-    { id: 2, playerName: "John", score: 80 },
-    { id: 3, playerName: "Laulau2", score: 120 },
-    { id: 4, playerName: playerName, score: 0 },
-    { id: 5, playerName: "Laulau1", score: 666 },
-    { id: 6, playerName: "Laulau4", score: 777 },
-    { id: 7, playerName: "Laulau3", score: -4 },
-    { id: 8, playerName: "Laulau5", score: 1 },
-    { id: 9, playerName: "Laulau6", score: 30 },
-    { id: 10, playerName: "Laulau7".slice(0, 13), score: 420 },
-    { id: 11, playerName: "DoitPasEtreAffiche".slice(0, 13), score: -420 },
-  ];
+    return (
+        <div className={styles.container}>
+            <Head>
+                <title>{storedPlayerName} in polygon.io</title>
+                <meta
+                    name="description"
+                    content="For the Advanced Software Engineering class"
+                />
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1"
+                />
+                <link rel="icon" href="/favicon.ico" />
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link
+                    rel="preconnect"
+                    href="https://fonts.gstatic.com"
+                    crossorigin
+                />
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap"
+                    rel="stylesheet"
+                />
+            </Head>
 
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>{playerName} in polygon.io</title>
-        <meta
-          name="description"
-          content="For the Advanced Software Engineering class"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
-
-      <PixiComponent gameData={gameData} />
-      <Minimap player={player} objects={objects} />
-      <Leaderboard testLeaderboardData={testLeaderboardData} />
-      <Chat playerName={playerName} />
-    </div>
-  );
+            <PixiComponent gameData={gameData} />
+            <Minimap player={player} objects={objects} />
+            <Chat playerName={storedPlayerName} />
+        </div>
+    );
 }
 
 export default Game;
