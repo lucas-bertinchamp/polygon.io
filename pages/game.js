@@ -5,6 +5,7 @@ import Minimap from "../components/Minimap";
 import Chat from "../components/Chat";
 import PixiComponent from "@/components/PixiComponent";
 
+
 function Game() {
     let storedPlayerName = "";
     let storedPlayerColor = "";
@@ -37,10 +38,38 @@ function Game() {
         // Add more objects as needed
     ]);
 
-    const updateMinimap = (newPlayer, newObjects) => {
-        setPlayer((prevData) => (newPlayer ? newPlayer : prevData));
-        setObjects((prevData) => (newObjects ? newObjects : prevData));
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
     };
+  }, [router]);
+
+  let playerName = localStorage.getItem("playerName");
+  let playerColor = localStorage.getItem("playerColor");
+  let gameData = { playerName: playerName, playerColor: playerColor };
+
+  // Minimap data
+  const [player, setPlayer] = useState({
+    top: "50%",
+    left: "50%",
+    backgroundColor: playerColor,
+  });
+  const [objects, setObjects] = useState([
+    {
+      id: 1,
+      position: { top: "30%", left: "40%", backgroundColor: "blue" },
+    },
+    {
+      id: 2,
+      position: { top: "60%", left: "70%", backgroundColor: "orange" },
+    },
+    // Add more objects as needed
+  ]);
+
+  const updateMinimap = (newPlayer, newObjects) => {
+    setPlayer((prevData) => (newPlayer ? newPlayer : prevData));
+    setObjects((prevData) => (newObjects ? newObjects : prevData));
+  };
 
     return (
         <div className={styles.container}>

@@ -7,6 +7,16 @@ import Projectile from "./Projectile";
 import Bars from "./Bars";
 import BarsUtils from "./utils/BarsUtils";
 import Leaderboard from "./Leaderboard";
+import io from "socket.io-client";
+
+const socket = io();
+
+async function apiXpBubble(method) {
+  let res = await fetch("/api/xpBubble", {
+    method: method,
+  });
+  return res.json();
+}
 
 const PixiComponent = ({ gameData }) => {
     // interact with the bars
@@ -64,73 +74,87 @@ const PixiComponent = ({ gameData }) => {
             0
         );
         app.stage.addChild(player.sprite);
-
-        // Créer des missiles
-        const missiles = [];
-
-        // Create playerName text
-        const playerNameText = new PIXI.Text(playerName, {
-            fill: 0x000000, // text color
-        });
-        playerNameText.anchor.set(0.5); // center the text
-        playerNameText.position.set(player.sprite.x, player.sprite.y - 55);
+        // remettre le text du joueur devant
         app.stage.addChild(playerNameText);
 
-        // Evenement déclenché si la position de la souris change
-        window.onmousemove = (e) => {
-            mousePos.x = e.clientX;
-            mousePos.y = e.clientY;
-        };
+        // si evolution : changer les valeurs maximales des barres
+        barsUtils.setBarMaxValue(1, healthByLevel[player.level - 1]);
+        barsUtils.setBarMaxValue(
+          2,
+          barsUtils.getBarMaxValue(2) + xpNeeded[player.level - 1]
+        );
+        // heal the player with the amount the level up gave him
+        barsUtils.setBarValue(
+          1,
+          barsUtils.getBarValue(1) +
+            healthByLevel[player.level - 1] -
+            healthByLevel[player.level - 2]
+        );
+        // remettre la barre d'XP à 0
+        barsUtils.setBarValue(2, 0);
+        // changer le nom de la barre d'XP
+        barsUtils.setBarName(2, "XP " + player.level);
+      }
 
-        // Evenement déclenché si on clique
-        window.onclick = (e) => {
-            if (player.level > 1) {
-                let theta = (2 * Math.PI) / player.level;
-                for (let i = 0; i < player.level; i++) {
-                    let theta_0 = -Math.PI / 2;
-                    if (player.level % 2 == 0) {
-                        theta_0 += Math.PI / 2 + theta / 2;
-                    }
-                    if (player.level == 2 || player.level == 6) {
-                        theta_0 += Math.PI / 2;
-                    }
-                    let dx = Math.cos(theta_0 + theta * i);
-                    let dy = Math.sin(theta_0 + theta * i);
-                    let radius = (1.5 * player.sprite.height) / 2;
-                    const missile = Projectile(dx, dy, 10, player.color, 1);
-                    missile.sprite.x = player.sprite.x + radius * dx;
-                    missile.sprite.y = player.sprite.y + radius * dy;
-                    missile.worldPos.x = player.worldPos.x + radius * dx;
-                    missile.worldPos.y = player.worldPos.y + radius * dy;
-                    missiles.push(missile);
-                }
-            }
-        };
+      //Actualise la position des bulles d'xp sur l'écran
+      xpBubblesList.forEach((bubble) => {
+        console.log(bubble);
+        app.stage.removeChild(bubble.sprite);
+        const distX = Math.abs(bubble.worldPos.x - player.worldPos.x);
+        const distY = Math.abs(bubble.worldPos.y - player.worldPos.y);
 
-        // Créer des bulles d'expérience
-        const xpBubbles = [];
-        for (let i = 0; i < nXpBubble; i++) {
-            xpBubbles.push(
-                XpBubble(
-                    null,
-                    null,
-                    (Math.random() * 2 - 1) * 500,
-                    (Math.random() * 2 - 1) * 500
-                )
-            );
+        if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
+          bubble.sprite.x =
+            player.sprite.x + bubble.worldPos.x - player.worldPos.x;
+          bubble.sprite.y =
+            player.sprite.y + bubble.worldPos.y - player.worldPos.y;
+          app.stage.addChild(bubble.sprite);
+        } else {
+          bubble.sprite.x = null;
+          bubble.sprite.y = null;
         }
+      });
 
-        //Créer des bulles de vie
-        const lifeBubbles = [];
-        for (let i = 0; i < nLifeBubble; i++) {
-            lifeBubbles.push(
-                LifeBubble(
-                    null,
-                    null,
-                    (Math.random() * 2 - 1) * 500,
-                    (Math.random() * 2 - 1) * 500
-                )
-            );
+      //Le joueur gagne de l'expérience par des bulles
+      xpBubblesList.forEach((bubble) => {
+        const distX = Math.abs(bubble.worldPos.x - player.worldPos.x);
+        const distY = Math.abs(bubble.worldPos.y - player.worldPos.y);
+
+        if (distX < 45 && distY < 45) {
+          app.stage.removeChild(bubble.sprite);
+          xpBubblesList.splice(xpBubblesList.indexOf(bubble), 1);
+          player.xpValue += bubble.xpValue;
+          // update the bar
+          barsUtils.setBarValue(2, barsUtils.getBarValue(2) + bubble.xpValue);
+          //apiXpBubble("DELETE", bubble.worldPos.x, bubble.worldPos.y);
+        }
+      });
+
+      /*
+      lifeBubbles.forEach((bubble) => {
+        if (bubble.sprite.x !== null && bubble.sprite.y !== null) {
+          app.stage.addChild(bubble.sprite);
+        }
+      });
+      */
+
+      //Enlever les missiles
+      missiles.forEach((missile) => {
+        app.stage.removeChild(missile.sprite);
+      });
+
+      // Deplacer les missiles
+      missiles.forEach((missile) => {
+        missile.worldPos.x += missile.speed_x;
+        missile.worldPos.y += missile.speed_y;
+
+        if (
+          missile.worldPos.x > worldWidth / 2 ||
+          missile.worldPos.x < -worldWidth / 2 ||
+          missile.worldPos.y > worldHeight / 2 ||
+          missile.worldPos.y < -worldHeight / 2
+        ) {
+          missiles.splice(missiles.indexOf(missile), 1);
         }
 
         // Boucle du jeu
