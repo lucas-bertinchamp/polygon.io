@@ -1,7 +1,9 @@
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const socketIo = require("socket.io");
 const { parse } = require("url");
 const next = require("next");
+const express = require("express");
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -10,6 +12,7 @@ const handle = app.getRequestHandler();
 const Redis = require("ioredis");
 
 let sockets = [];
+const port = process.env.PORT || 3000;
 
 let nXpBubble = 100;
 
@@ -28,7 +31,7 @@ const httpServer = createServer((req, res) => {
   }
 });
 
-const io = new Server(httpServer);
+const io = socketIo(httpServer);
 
 // Connexion à la base de données Redis
 const redisClient = Redis.createClient(process.env.REDIS_URL);
@@ -83,11 +86,9 @@ io.on("connection", (socket) => {
   });
 });
 
-const port = process.env.PORT || 80;
 httpServer.listen(port, () => {
   console.log(`Serveur websocket en cours d'exécution sur le port ${port}`);
 });
-console.log(io);
 
 const createXpBubble = () => {
   let randomPosX = Math.floor(Math.random() * 1000 - 500);
