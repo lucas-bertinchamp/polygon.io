@@ -39,17 +39,15 @@ const io = socketIo(httpServer);
 const redisClient = Redis.createClient(process.env.REDIS_URL);
 
 setInterval(() => {
-  console.log("Rafraîchissement des bulles d'expérience et de vie");
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   sendXpBubble();
   sendHealthBubble();
-}, 1000); // Rafraîchir toutes les secondes
+}, 30);
 
 setInterval(() => {
-  console.log("Rafraîchissement des joueurs");
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   sendPlayer();
-}, 100); // Rafraîchir toutes les secondes
+}, 30);
 
 // Gestion des connexions websocket
 io.on("connection", (socket) => {
