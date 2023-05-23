@@ -23,16 +23,20 @@ export default async function handler(req, res) {
           xpBubble,
         },
       };
+
     case "DELETE":
       let xpBubblePosX = req.body.xpBubblePosX;
       let xpBubblePosY = req.body.xpBubblePosY;
-      
+
       await redis.hdel(
         "xpBubble",
         JSON.stringify(xpBubblePosX) + ";" + JSON.stringify(xpBubblePosY)
       );
 
-      //Création d'une nouvelle bulle
+      res.status(200).json(newXpBubble);
+      break;
+
+    case "POST":
       let randomPosX = Math.floor(Math.random() * 1000 - 500);
       let randomPosY = Math.floor(Math.random() * 1000 - 500);
       let newXpBubble = {

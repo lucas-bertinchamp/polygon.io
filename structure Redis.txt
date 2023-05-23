@@ -1,0 +1,1 @@
+xpBubble : dictionnaire ayant pour clé "worldPosX;worldPosY". Chaque élément est de la forme {worldPosX, worldPosY, xp}
