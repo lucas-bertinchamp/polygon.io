@@ -14,6 +14,7 @@ let sockets = [];
 let nXpBubble = 100;
 
 const httpServer = createServer((req, res) => {
+  console.log(req.url);
   const parsedUrl = parse(req.url, true);
   const { pathname, query } = parsedUrl;
   // Gestion des routes Next.js
@@ -86,6 +87,7 @@ const port = process.env.PORT || 3000;
 httpServer.listen(port, () => {
   console.log(`Serveur websocket en cours d'exécution sur le port ${port}`);
 });
+console.log(io);
 
 const createXpBubble = () => {
   let randomPosX = Math.floor(Math.random() * 1000 - 500);
