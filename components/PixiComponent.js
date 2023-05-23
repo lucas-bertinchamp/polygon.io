@@ -131,18 +131,26 @@ const PixiComponent = ({ gameData }) => {
       xpBubbleList = temporaryBubbles;
     });
 
+    let healthBubbleList = [];
     //Créer des bulles de vie
-    const lifeBubbles = [];
-    for (let i = 0; i < nLifeBubble; i++) {
-      lifeBubbles.push(
-        LifeBubble(
+    socketClient.on("healthBubble", (data) => {
+      healthBubbleList.forEach((bubble) => {
+        if (bubble.sprite.x !== null && bubble.sprite.y !== null) {
+          app.stage.removeChild(bubble.sprite);
+        }
+      });
+      let temporaryBubbles = Object.values(data).map((bubble) => {
+        bubble = JSON.parse(bubble);
+        return LifeBubble(
           null,
           null,
-          (Math.random() * 2 - 1) * 500,
-          (Math.random() * 2 - 1) * 500
-        )
-      );
-    }
+          bubble.worldPosX,
+          bubble.worldPosY,
+          bubble.xp
+        );
+      });
+      healthBubbleList = temporaryBubbles;
+    });
 
     // Boucle du jeu
     app.ticker.add(() => {
@@ -197,13 +205,13 @@ const PixiComponent = ({ gameData }) => {
       });
 
       //Le joueur gagne de la vie par des bulles
-      lifeBubbles.forEach((bubble) => {
+      healthBubbleList.forEach((bubble) => {
         const distX = Math.abs(bubble.worldPos.x - player.worldPos.x);
         const distY = Math.abs(bubble.worldPos.y - player.worldPos.y);
 
         if (distX < 45 && distY < 45) {
           app.stage.removeChild(bubble.sprite);
-          lifeBubbles.splice(lifeBubbles.indexOf(bubble), 1);
+          healthBubbleList.splice(healthBubbleList.indexOf(bubble), 1);
           // change the health bar and the value of the player's health
           if (player.health + bubble.lifeValue < healthByLevel[player.level]) {
             barsUtils.setBarValue(1, player.health + bubble.lifeValue);
@@ -212,6 +220,12 @@ const PixiComponent = ({ gameData }) => {
             barsUtils.setBarValue(1, healthByLevel[player.level]);
             player.health = healthByLevel[player.level];
           }
+
+          // supprimer la bulle de vie de la base de données
+          socketClient.emit("deleteHealthBubble", {
+            healthBubblePosX: bubble.worldPos.x,
+            healthBubblePosY: bubble.worldPos.y,
+          });
         }
       });
 
@@ -251,13 +265,13 @@ const PixiComponent = ({ gameData }) => {
       }
 
       //Enlever toutes les bulles
-      xpBubbleList.concat(lifeBubbles).forEach((bubble) => {
+      xpBubbleList.concat(healthBubbleList).forEach((bubble) => {
         app.stage.removeChild(bubble.sprite);
       });
 
       //Actualise la position des bulles sur l'écran
-      xpBubbleList.concat(lifeBubbles).forEach((bubble) => {
-        xpBubbleList.concat(lifeBubbles).forEach((bubble) => {
+      xpBubbleList.concat(healthBubbleList).forEach((bubble) => {
+        xpBubbleList.concat(healthBubbleList).forEach((bubble) => {
           const distX = Math.abs(bubble.worldPos.x - player.worldPos.x);
           const distY = Math.abs(bubble.worldPos.y - player.worldPos.y);
 
@@ -280,7 +294,7 @@ const PixiComponent = ({ gameData }) => {
         }
       });
 
-      lifeBubbles.forEach((bubble) => {
+      healthBubbleList.forEach((bubble) => {
         if (bubble.sprite.x !== null && bubble.sprite.y !== null) {
           app.stage.addChild(bubble.sprite);
         }
