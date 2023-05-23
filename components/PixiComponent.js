@@ -9,7 +9,7 @@ import BarsUtils from "./utils/BarsUtils";
 import Leaderboard from "./Leaderboard";
 import { io } from "socket.io-client";
 
-const socketClient = io.connect(" https://polygonio.herokuapp.com/");
+const socketClient = io.connect();
 
 const PixiComponent = ({ gameData }) => {
   // interact with the bars
