@@ -7,9 +7,6 @@ import Projectile from "./Projectile";
 import Bars from "./Bars";
 import BarsUtils from "./utils/BarsUtils";
 import Leaderboard from "./Leaderboard";
-import { io } from "socket.io-client";
-
-const socketClient = io.connect();
 
 const PixiComponent = ({ gameData }) => {
   // interact with the bars
