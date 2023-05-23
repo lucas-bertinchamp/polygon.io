@@ -42,7 +42,7 @@ setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   sendXpBubble();
   sendHealthBubble();
-}, 2500); // Rafraîchir toutes les secondes
+}, 1000); // Rafraîchir toutes les secondes
 
 // Gestion des connexions websocket
 io.on("connection", (socket) => {
