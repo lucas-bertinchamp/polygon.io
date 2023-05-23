@@ -152,6 +152,34 @@ const PixiComponent = ({ gameData }) => {
       healthBubbleList = temporaryBubbles;
     });
 
+    let playerList = [];
+    //Créer des joueurs
+    socketClient.on("player", (data) => {
+      playerList.forEach((otherPlayer) => {
+        if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
+          app.stage.removeChild(otherPlayer.sprite);
+        }
+      });
+      let temporaryPlayers = [];
+      Object.values(data).forEach((otherPlayer) => {
+        otherPlayer = JSON.parse(otherPlayer);
+        if (otherPlayer.id !== socketClient.id) {
+          let otherPlayerObject = Player(
+            null,
+            null,
+            otherPlayer.worldPosX,
+            otherPlayer.worldPosY,
+            otherPlayer.level,
+            otherPlayer.color,
+            otherPlayer.hp,
+            otherPlayer.xp
+          );
+          temporaryPlayers.push(otherPlayerObject);
+        }
+      });
+      playerList = temporaryPlayers;
+    });
+
     // Boucle du jeu
     app.ticker.add(() => {
       const speed = 7.5;
@@ -171,6 +199,48 @@ const PixiComponent = ({ gameData }) => {
       ) {
         player.worldPos.y = player.worldPos.y + cursorY * speed;
       }
+
+      //Envoie la postion du joueur au serveur
+      if (socketClient.connected) {
+        socketClient.emit("updatePlayer", {
+          id: socketClient.id,
+          name: player.name,
+          color: player.color,
+          worldPosX: player.worldPos.x,
+          worldPosY: player.worldPos.y,
+          level: player.level,
+          hp: player.health,
+          xp: player.xpTotal,
+          ammo: 0,
+        });
+      }
+
+      // Enlève les joueurs de l'écran puis actualise leur position
+      playerList.forEach((otherPlayer) => {
+        if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
+          app.stage.removeChild(otherPlayer.sprite);
+        }
+
+        const distX = Math.abs(otherPlayer.worldPos.x - player.worldPos.x);
+        const distY = Math.abs(otherPlayer.worldPos.y - player.worldPos.y);
+
+        if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
+          otherPlayer.sprite.x =
+            player.sprite.x + otherPlayer.worldPos.x - player.worldPos.x;
+          otherPlayer.sprite.y =
+            player.sprite.y + otherPlayer.worldPos.y - player.worldPos.y;
+        } else {
+          otherPlayer.sprite.x = null;
+          otherPlayer.sprite.y = null;
+        }
+      });
+
+      // Mettre les joueurs assez proches du joueur
+      playerList.forEach((otherPlayer) => {
+        if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
+          app.stage.addChild(otherPlayer.sprite);
+        }
+      });
 
       //Le joueur gagne de l'expérience par des bulles
       xpBubbleList.forEach((bubble) => {

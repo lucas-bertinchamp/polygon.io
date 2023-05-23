@@ -10,6 +10,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const Redis = require("ioredis");
+const { send } = require("process");
 
 let sockets = [];
 const port = process.env.PORT || 3000;
@@ -38,11 +39,17 @@ const io = socketIo(httpServer);
 const redisClient = Redis.createClient(process.env.REDIS_URL);
 
 setInterval(() => {
-  console.log("Rafraîchissement des données de la base de données Redis");
+  console.log("Rafraîchissement des bulles d'expérience et de vie");
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   sendXpBubble();
   sendHealthBubble();
 }, 1000); // Rafraîchir toutes les secondes
+
+setInterval(() => {
+  console.log("Rafraîchissement des joueurs");
+  // Effectuer l'appel à la base de données pour récupérer les données mises à jour
+  sendPlayer();
+}, 100); // Rafraîchir toutes les secondes
 
 // Gestion des connexions websocket
 io.on("connection", (socket) => {
@@ -60,7 +67,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("deleteHealthBubble", (socket) => {
-    console.log("Suppression d'une bulle de vie");
     redisClient.hdel(
       "healthBubble",
       JSON.stringify(socket.healthBubblePosX) +
@@ -68,6 +74,29 @@ io.on("connection", (socket) => {
         JSON.stringify(socket.healthBubblePosY)
     );
   });
+
+  socket.on("updatePlayer", (socket) => {
+    console.log("Mise à jour d'un joueur");
+    if (socket.id !== "") {
+      let playerData = {
+        id: socket.id,
+        name: socket.name,
+        color: socket.color,
+        worldPosX: socket.worldPosX,
+        worldPosY: socket.worldPosY,
+        level: socket.level,
+        hp: socket.hp,
+        xp: socket.xp,
+        ammo: socket.ammo,
+      };
+      redisClient.hset(
+        "player",
+        JSON.stringify(socket.id),
+        JSON.stringify(playerData)
+      );
+    }
+  });
+
   // Gérez les événements de websocket ici
 
   // Gestion des déconnexions websocket
@@ -75,6 +104,9 @@ io.on("connection", (socket) => {
     console.log("Déconnexion websocket");
     sockets = sockets.filter((s) => s !== socket);
     console.log(`Il y a ${sockets.length} connexions websocket`);
+
+    // Supprimer les données du joueur de la base de données Redis
+    redisClient.hdel("player", JSON.stringify(socket.id));
   });
 });
 
@@ -85,7 +117,6 @@ httpServer.listen(port, () => {
 const sendXpBubble = () => {
   redisClient.hgetall("xpBubble", (err, data) => {
     if (err) {
-      // Gérer les erreurs de la base de données
       console.error(
         "Erreur lors de la récupération des données depuis Redis",
         err
@@ -108,15 +139,12 @@ const sendXpBubble = () => {
 const sendHealthBubble = () => {
   redisClient.hgetall("healthBubble", (err, data) => {
     if (err) {
-      // Gérer les erreurs de la base de données
       console.error(
         "Erreur lors de la récupération des données depuis Redis",
         err
       );
       return;
     }
-
-    console.log(data);
 
     // Si pas assez de bulles de vie, en créer une nouvelle
     if (Object.keys(data).length < nHealthBubble) {
@@ -127,6 +155,20 @@ const sendHealthBubble = () => {
 
     // Envoyer les données aux clients via les connexions WebSocket
     io.sockets.emit("healthBubble", data);
+  });
+};
+const sendPlayer = () => {
+  redisClient.hgetall("player", (err, data) => {
+    if (err) {
+      console.error(
+        "Erreur lors de la récupération des données depuis Redis",
+        err
+      );
+      return;
+    }
+
+    // Envoyer les données aux clients via les connexions WebSocket
+    io.sockets.emit("player", data);
   });
 };
 
