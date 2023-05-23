@@ -83,7 +83,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 80;
 httpServer.listen(port, () => {
   console.log(`Serveur websocket en cours d'exécution sur le port ${port}`);
 });
