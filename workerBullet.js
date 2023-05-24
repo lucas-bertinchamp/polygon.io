@@ -17,6 +17,6 @@ const sendBullet = () => {
     }
 
     // Envoyer les données aux clients via les connexions WebSocket
-    parentPort.emit("allBullet", data);
+    parentPort.postMessage(data);
   });
 };
