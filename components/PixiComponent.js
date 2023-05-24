@@ -16,16 +16,16 @@ const PixiComponent = ({ gameData }) => {
   // interact with the bars
   let barsUtils = BarsUtils();
 
-  let playerName = gameData.playerName;
-  let playerColor = gameData.playerColor;
-  let playerColorCoded = playerColor.replace("#", "0x");
+  let dataPlayerName = gameData.playerName;
+  let dataPlayerColor = gameData.playerColor;
+  let playerColorCoded = dataPlayerColor.replace("#", "0x");
 
   // Leaderboard data (for testing, it should be fetched from the API)
   let testLeaderboardData = [
     { id: 1, playerName: "Elie", score: 10000, color: "red" },
     { id: 2, playerName: "John", score: 80, color: "blue" },
     { id: 3, playerName: "Laulau2", score: 120, color: "green" },
-    { id: 4, playerName: playerName, score: 0, color: playerColor },
+    { id: 4, playerName: dataPlayerName, score: 0, color: playerColorCoded },
     { id: 5, playerName: "Laulau1", score: 666, color: "yellow" },
     { id: 6, playerName: "Laulau4", score: 777, color: "purple" },
     { id: 7, playerName: "Laulau3", score: -4 },
@@ -66,7 +66,7 @@ const PixiComponent = ({ gameData }) => {
       playerColorCoded,
       healthByLevel[1],
       0,
-      playerName
+      dataPlayerName
     );
     app.stage.addChild(player.sprite);
     app.stage.addChild(player.playerNameText);
@@ -329,7 +329,7 @@ const PixiComponent = ({ gameData }) => {
           // trier le leaderboard : TODO : ça trie pas le leaderboard
           testLeaderboardData
             .map((p) => {
-              if (p.playerName == playerName) {
+              if (p.playerName == dataPlayerName) {
                 p.score = player.xpTotal;
               }
             })
@@ -556,22 +556,28 @@ const PixiComponent = ({ gameData }) => {
           if (player.health <= 0) {
             app.stage.removeChild(player.sprite);
             if (player.level === 1) {
-              player.level = 2; // si le joueur meurt au niveau 1, il passe au niveau 2 pour qu'il revienne au niveau 1
+              player = Player(
+                app.screen.width / 2,
+                app.screen.height / 2,
+                Math.floor(Math.random() * worldWidth - worldWidth / 2),
+                Math.floor(Math.random() * worldHeight - worldHeight / 2),
+                1,
+                player.color,
+                healthByLevel[1],
+                0,
+                player.name
+              );
             }
             player = Player(
               app.screen.width / 2,
               app.screen.height / 2,
-              Math.floor(
-                Math.random() * window.innerWidth - window.innerWidth / 2
-              ),
-              Math.floor(
-                Math.random() * window.innerHeight - window.innerHeight / 2
-              ),
+              player.worldPos.x,
+              player.worldPos.y,
               player.level - 1,
-              playerColorCoded,
+              player.color,
               healthByLevel[player.level - 1],
               player.xpTotal - xpNeeded[player.level - 1],
-              player.playerName
+              player.name
             );
 
             app.stage.addChild(player.sprite);
