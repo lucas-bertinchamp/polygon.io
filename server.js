@@ -55,7 +55,7 @@ workerPlayer.on("message", (data) => {
 });
 
 workerBullet.on("message", (data) => {
-  io.emit("bullet", data);
+  io.emit("allBullet", data);
 });
 
 // Connexion à la base de données Redis
