@@ -8,6 +8,7 @@ import Bars from "./Bars";
 import BarsUtils from "./utils/BarsUtils";
 import Leaderboard from "./Leaderboard";
 import { io } from "socket.io-client";
+import Chat from "./Chat";
 
 const socketClient = io();
 
@@ -37,11 +38,11 @@ const PixiComponent = ({ gameData }) => {
   const worldWidth = 1000;
   const worldHeight = 1000;
 
-  const nXpBubble = 20;
-  const nLifeBubble = 4;
   const pixiContainerRef = useRef(null);
   const xpNeeded = [0, 10, 20, 40, 80, 160, 100000]; // 0 to start at index 1 for level 1
   const healthByLevel = [0, 100, 120, 140, 160, 180, 200]; // 0 to start at index 1 for level 1
+
+  let totalBullets = 0;
 
   const mousePos = { x: 0, y: 0 };
 
@@ -64,20 +65,11 @@ const PixiComponent = ({ gameData }) => {
       1,
       playerColorCoded,
       healthByLevel[1],
-      0
+      0,
+      playerName
     );
     app.stage.addChild(player.sprite);
-
-    // Créer des missiles
-    const missiles = [];
-
-    // Create playerName text
-    const playerNameText = new PIXI.Text(playerName, {
-      fill: 0x000000, // text color
-    });
-    playerNameText.anchor.set(0.5); // center the text
-    playerNameText.position.set(player.sprite.x, player.sprite.y - 55);
-    app.stage.addChild(playerNameText);
+    app.stage.addChild(player.playerNameText);
 
     // Evenement déclenché si la position de la souris change
     window.onmousemove = (e) => {
@@ -85,6 +77,7 @@ const PixiComponent = ({ gameData }) => {
       mousePos.y = e.clientY;
     };
 
+    let ownBullet = [];
     // Evenement déclenché si on clique
     window.onclick = (e) => {
       if (player.level > 1) {
@@ -100,15 +93,78 @@ const PixiComponent = ({ gameData }) => {
           let dx = Math.cos(theta_0 + theta * i);
           let dy = Math.sin(theta_0 + theta * i);
           let radius = (1.5 * player.sprite.height) / 2;
-          const missile = Projectile(dx, dy, 10, player.color, 1);
+          const missile = Projectile(
+            socketClient.id,
+            totalBullets,
+            dx,
+            dy,
+            null,
+            null,
+            10,
+            player.color,
+            5
+          );
           missile.sprite.x = player.sprite.x + radius * dx;
           missile.sprite.y = player.sprite.y + radius * dy;
           missile.worldPos.x = player.worldPos.x + radius * dx;
           missile.worldPos.y = player.worldPos.y + radius * dy;
-          missiles.push(missile);
+          let key = JSON.stringify({ id: socketClient.id, num: totalBullets });
+          let value = JSON.stringify({
+            playerId: socketClient.id,
+            num: totalBullets,
+            dX: dx,
+            dY: dy,
+            worldPosX: missile.worldPos.x,
+            worldPosY: missile.worldPos.y,
+            color: player.color,
+            dmgValue: missile.dmgValue,
+          });
+          let data = JSON.stringify({ key: key, value: value });
+          // Envoyer la bullets au server
+          socketClient.emit("addBullet", data);
+          totalBullets++;
+          ownBullet.push(missile);
         }
       }
     };
+
+    let otherBulletParsed = [];
+    let otherBullet = [];
+    // Créer les projectiles des autres joueurs
+    socketClient.on("allBullet", (data) => {
+      otherBulletParsed = [];
+      // Ne garder que les projectiles des autres joueurs
+      Object.keys(data).forEach((key) => {
+        let parsedKey = JSON.parse(key);
+        if (parsedKey.id !== socketClient.id) {
+          let value = JSON.parse(data[key]);
+          value.playerId = parsedKey.id;
+          otherBulletParsed.push(value);
+        }
+      });
+    });
+
+    socketClient.on("deleteContactBullet", (data) => {
+      let parsedData = JSON.parse(data);
+      ownBullet.forEach((bullet) => {
+        if (
+          bullet.num === parsedData.num &&
+          bullet.playerId === parsedData.id
+        ) {
+          app.stage.removeChild(bullet.sprite);
+          ownBullet.splice(ownBullet.indexOf(bullet), 1);
+        }
+      });
+      otherBullet.forEach((bullet) => {
+        if (
+          bullet.num === parsedData.num &&
+          bullet.playerId === parsedData.id
+        ) {
+          app.stage.removeChild(bullet.sprite);
+          otherBullet.splice(otherBullet.indexOf(bullet), 1);
+        }
+      });
+    });
 
     let xpBubbleList = [];
     // Créer des bulles d'expérience
@@ -158,6 +214,7 @@ const PixiComponent = ({ gameData }) => {
       playerList.forEach((otherPlayer) => {
         if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
           app.stage.removeChild(otherPlayer.sprite);
+          app.stage.removeChild(otherPlayer.playerNameText);
         }
       });
       let temporaryPlayers = [];
@@ -172,7 +229,8 @@ const PixiComponent = ({ gameData }) => {
             otherPlayer.level,
             otherPlayer.color,
             otherPlayer.hp,
-            otherPlayer.xp
+            otherPlayer.xp,
+            otherPlayer.name
           );
           temporaryPlayers.push(otherPlayerObject);
         }
@@ -219,6 +277,7 @@ const PixiComponent = ({ gameData }) => {
       playerList.forEach((otherPlayer) => {
         if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
           app.stage.removeChild(otherPlayer.sprite);
+          app.stage.removeChild(otherPlayer.playerNameText);
         }
 
         const distX = Math.abs(otherPlayer.worldPos.x - player.worldPos.x);
@@ -229,6 +288,8 @@ const PixiComponent = ({ gameData }) => {
             player.sprite.x + otherPlayer.worldPos.x - player.worldPos.x;
           otherPlayer.sprite.y =
             player.sprite.y + otherPlayer.worldPos.y - player.worldPos.y;
+          otherPlayer.playerNameText.x = otherPlayer.sprite.x;
+          otherPlayer.playerNameText.y = otherPlayer.sprite.y - 55;
         } else {
           otherPlayer.sprite.x = null;
           otherPlayer.sprite.y = null;
@@ -239,6 +300,7 @@ const PixiComponent = ({ gameData }) => {
       playerList.forEach((otherPlayer) => {
         if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
           app.stage.addChild(otherPlayer.sprite);
+          app.stage.addChild(otherPlayer.playerNameText);
         }
       });
 
@@ -310,7 +372,8 @@ const PixiComponent = ({ gameData }) => {
           player.level + 1,
           playerColorCoded,
           player.health,
-          player.xpTotal
+          player.xpTotal,
+          player.name
         );
         if (player.level >= 1) {
           player.health +=
@@ -321,7 +384,7 @@ const PixiComponent = ({ gameData }) => {
         }
         app.stage.addChild(player.sprite);
         // remettre le text du joueur devant
-        app.stage.addChild(playerNameText);
+        app.stage.addChild(player.playerNameText);
 
         // si evolution : changer les valeurs maximales des barres
         barsUtils.setBarMaxValue(1, healthByLevel[player.level]);
@@ -341,20 +404,18 @@ const PixiComponent = ({ gameData }) => {
 
       //Actualise la position des bulles sur l'écran
       xpBubbleList.concat(healthBubbleList).forEach((bubble) => {
-        xpBubbleList.concat(healthBubbleList).forEach((bubble) => {
-          const distX = Math.abs(bubble.worldPos.x - player.worldPos.x);
-          const distY = Math.abs(bubble.worldPos.y - player.worldPos.y);
+        const distX = Math.abs(bubble.worldPos.x - player.worldPos.x);
+        const distY = Math.abs(bubble.worldPos.y - player.worldPos.y);
 
-          if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
-            bubble.sprite.x =
-              player.sprite.x + bubble.worldPos.x - player.worldPos.x;
-            bubble.sprite.y =
-              player.sprite.y + bubble.worldPos.y - player.worldPos.y;
-          } else {
-            bubble.sprite.x = null;
-            bubble.sprite.y = null;
-          }
-        });
+        if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
+          bubble.sprite.x =
+            player.sprite.x + bubble.worldPos.x - player.worldPos.x;
+          bubble.sprite.y =
+            player.sprite.y + bubble.worldPos.y - player.worldPos.y;
+        } else {
+          bubble.sprite.x = null;
+          bubble.sprite.y = null;
+        }
       });
 
       // Remettre toutes les bulles d'expérience assez proches du joueur
@@ -371,23 +432,29 @@ const PixiComponent = ({ gameData }) => {
       });
 
       //Enlever les missiles
-      missiles.forEach((missile) => {
+      ownBullet.forEach((missile) => {
         app.stage.removeChild(missile.sprite);
       });
 
       // Deplacer les missiles
-      missiles.forEach((missile) => {
+      ownBullet.forEach((missile) => {
         missile.worldPos.x += missile.speed_x;
         missile.worldPos.y += missile.speed_y;
 
-        if (
-          missile.worldPos.x > worldWidth / 2 ||
-          missile.worldPos.x < -worldWidth / 2 ||
-          missile.worldPos.y > worldHeight / 2 ||
-          missile.worldPos.y < -worldHeight / 2
-        ) {
-          missiles.splice(missiles.indexOf(missile), 1);
-        }
+        let key = JSON.stringify({ id: socketClient.id, num: missile.num });
+        let value = JSON.stringify({
+          playerId: socketClient.id,
+          num: missile.num,
+          dX: missile.speed_x,
+          dY: missile.speed_y,
+          worldPosX: missile.worldPos.x,
+          worldPosY: missile.worldPos.y,
+          color: player.color,
+          dmgValue: missile.dmgValue,
+        });
+        let data = JSON.stringify({ key: key, value: value });
+        // Envoyer la bullet au server
+        socketClient.emit("addBullet", data);
 
         const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
         const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
@@ -401,19 +468,90 @@ const PixiComponent = ({ gameData }) => {
           missile.sprite.x = null;
           missile.sprite.y = null;
         }
+
+        if (
+          missile.worldPos.x > worldWidth / 2 ||
+          missile.worldPos.x < -worldWidth / 2 ||
+          missile.worldPos.y > worldHeight / 2 ||
+          missile.worldPos.y < -worldHeight / 2
+        ) {
+          ownBullet.splice(ownBullet.indexOf(missile), 1);
+          //suprimer la bullet de la base de données
+          socketClient.emit(
+            "deleteBullet",
+            JSON.stringify({
+              id: socketClient.id,
+              num: missile.num,
+            })
+          );
+        }
       });
 
+      // Afficher les bullets des autres joueurs assez proches du joueur
+      otherBullet.forEach((missile) => {
+        app.stage.removeChild(missile.sprite);
+      });
+      otherBullet = [];
+      otherBulletParsed.forEach((missile) => {
+        let distX = Math.abs(missile.worldPosX - player.worldPos.x);
+        let distY = Math.abs(missile.worldPosY - player.worldPos.y);
+
+        if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
+          let bullet = Projectile(
+            missile.playerId,
+            missile.num,
+            missile.dX,
+            missile.dY,
+            missile.worldPosX,
+            missile.worldPosY,
+            10,
+            missile.color,
+            missile.dmgValue
+          );
+          bullet.sprite.x =
+            player.sprite.x + bullet.worldPos.x - player.worldPos.x;
+          bullet.sprite.y =
+            player.sprite.y + bullet.worldPos.y - player.worldPos.y;
+          app.stage.addChild(bullet.sprite);
+          otherBullet.push(bullet);
+        }
+      });
+
+      console.log(otherBullet);
       // vérifier si le joueur est touché par un missile
-      missiles.forEach((missile) => {
+      otherBullet.forEach((missile) => {
         const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
         const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
         if (distX < 45 && distY < 45) {
           // augmenter les valeurs de comparaison avec distX et distY pour tester la suite (45 = valeurs de base)
+          console.log("touché");
+
           app.stage.removeChild(missile.sprite);
+          otherBullet.splice(otherBullet.indexOf(missile), 1);
+
           player.health -= missile.dmgValue;
-          missiles.splice(missiles.indexOf(missile), 1);
+
+          otherBulletParsed.forEach((bullet) => {
+            if (
+              bullet.num === missile.num &&
+              bullet.playerId === missile.playerId
+            ) {
+              otherBulletParsed.splice(otherBulletParsed.indexOf(bullet), 1);
+            }
+          });
+
+          // Dire au serveur d'enlever la bullet
+          socketClient.emit(
+            "deleteContactBullet",
+            JSON.stringify({
+              id: missile.playerId,
+              num: missile.num,
+            })
+          );
+
           // change the health bar
           barsUtils.setBarValue(1, player.health);
+
           // if the player is dead
           if (player.health <= 0) {
             app.stage.removeChild(player.sprite);
@@ -430,9 +568,10 @@ const PixiComponent = ({ gameData }) => {
               healthByLevel[player.level - 1],
               player.xpTotal - xpNeeded[player.level - 1]
             );
+
             app.stage.addChild(player.sprite);
             // remettre le text du joueur devant
-            app.stage.addChild(playerNameText);
+            app.stage.addChild(player.playerNameText);
 
             // on change les max des bars au niveau en dessous
             barsUtils.setBarMaxValue(1, healthByLevel[player.level]);
@@ -448,7 +587,7 @@ const PixiComponent = ({ gameData }) => {
       });
 
       // Remettre les missiles assez proches du joueur
-      missiles.forEach((missile) => {
+      ownBullet.forEach((missile) => {
         if (missile.sprite.x !== null && missile.sprite.y !== null) {
           app.stage.addChild(missile.sprite);
         }
@@ -458,13 +597,14 @@ const PixiComponent = ({ gameData }) => {
     // Nettoyez l'application PIXI lorsque le composant est démonté
     return () => {
       app.stage.removeChild(player.sprite);
-      app.stage.removeChild(playerNameText);
+      app.stage.removeChild(player.playerNameText);
       pixiContainer.removeChild(app.view);
       app.destroy();
     };
   }, []);
   return (
     <div ref={pixiContainerRef}>
+      <Chat socket={socketClient} />
       <Bars barsData={barsUtils.barsData} />
       <Leaderboard testLeaderboardData={testLeaderboardData} />
     </div>

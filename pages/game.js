@@ -62,7 +62,6 @@ function Game() {
 
       <PixiComponent gameData={gameData} />
       <Minimap player={player} objects={objects} />
-      <Chat playerName={storedPlayerName} />
     </div>
   );
 }

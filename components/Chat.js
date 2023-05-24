@@ -2,47 +2,56 @@ import React, { useState } from "react";
 import style from "@/styles/Chat.module.css";
 import { useEffect } from "react";
 
-const Chat = ({ playerName }) => {
-    // Miaou
+const Chat = ({ socket }) => {
+  // Miaou
 
-    const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
 
-    useEffect(() => {
-        // Masquer chaque message du chat après 10 secondes
-        messages.forEach((message, index) => {
-            const timeout = setTimeout(() => {
-                setMessages((prevMessages) => {
-                    const updatedMessages = [...prevMessages];
-                    updatedMessages.splice(index, 1); // Supprimer le message à l'index spécifié
-                    return updatedMessages;
-                });
-            }, 10000);
+  // Ecouter les messages du serveur
+  socket.on("messageList", (message) => {
+    setMessages((prevMessages) => [...message].reverse());
+  });
 
-            // Nettoyer le timeout lorsque le composant est démonté ou lorsque le message est supprimé manuellement
-            return () => clearTimeout(timeout);
+  /*
+  useEffect(() => {
+    // Masquer chaque message du chat après 10 secondes
+    messages.forEach((message, index) => {
+      const timeout = setTimeout(() => {
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          updatedMessages.splice(index, 1); // Supprimer le message à l'index spécifié
+          return updatedMessages;
         });
-    }, [messages]);
+      }, 10000);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const message = e.target.message.value;
-        const fullMessage = `${playerName}: ${message}`;
-        setMessages((prevMessages) => [...prevMessages, fullMessage]);
-        e.target.message.value = "";
-    };
+      // Nettoyer le timeout lorsque le composant est démonté ou lorsque le message est supprimé manuellement
+      return () => clearTimeout(timeout);
+    });
+  }, [messages]);
+*/
 
-    return (
-        <div className={style.chat}>
-            <div>
-                {messages.map((message, index) => (
-                    <div key={index}>{message}</div>
-                ))}
-            </div>
-            <form onSubmit={handleSubmit}>
-                <input type="text" name="message" />
-            </form>
-        </div>
-    );
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const message = e.target.message.value;
+
+    // Envoyer le message au serveur
+    socket.emit("message", message);
+
+    e.target.message.value = "";
+  };
+
+  return (
+    <div className={style.chat}>
+      <div>
+        {messages.map((message, index) => (
+          <div key={index}>{message}</div>
+        ))}
+      </div>
+      <form onSubmit={handleSubmit}>
+        <input type="text" name="message" />
+      </form>
+    </div>
+  );
 };
 
 export default Chat;
