@@ -260,6 +260,7 @@ const PixiComponent = ({ gameData }) => {
 
       //Envoie la postion du joueur au serveur
       if (socketClient.connected) {
+        console.log(player.worldPos.x, player.worldPos.y);
         socketClient.emit("updatePlayer", {
           id: socketClient.id,
           name: player.name,
@@ -517,7 +518,6 @@ const PixiComponent = ({ gameData }) => {
         }
       });
 
-      console.log(otherBullet);
       // vérifier si le joueur est touché par un missile
       otherBullet.forEach((missile) => {
         const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
@@ -566,7 +566,8 @@ const PixiComponent = ({ gameData }) => {
               player.level - 1,
               playerColorCoded,
               healthByLevel[player.level - 1],
-              player.xpTotal - xpNeeded[player.level - 1]
+              player.xpTotal - xpNeeded[player.level - 1],
+              player.playerName
             );
 
             app.stage.addChild(player.sprite);

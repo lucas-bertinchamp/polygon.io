@@ -5,6 +5,8 @@ const { parse } = require("url");
 const next = require("next");
 const express = require("express");
 
+const { Worker } = require("worker_threads");
+
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -15,10 +17,6 @@ const { stringify } = require("querystring");
 
 let sockets = [];
 const port = process.env.PORT || 3000;
-
-let nXpBubble = 100;
-let nHealthBubble = 10;
-let nMessage = 20;
 
 const httpServer = createServer((req, res) => {
   console.log(req.url);
@@ -37,20 +35,43 @@ const httpServer = createServer((req, res) => {
 
 const io = socketIo(httpServer);
 
+let nMessage = 20;
+
+const workerXp = new Worker("./workerXp.js");
+const workerHealth = new Worker("./workerHealth.js");
+const workerPlayer = new Worker("./workerPlayer.js");
+
+workerXp.on("message", (data) => {
+  io.emit("xpBubble", data);
+});
+
+workerHealth.on("message", (data) => {
+  io.emit("healthBubble", data);
+});
+
+workerPlayer.on("message", (data) => {
+  io.emit("player", data);
+});
+
 // Connexion à la base de données Redis
 const redisClient = Redis.createClient(process.env.REDIS_URL);
 
 setInterval(() => {
+  // Supprimer la base de données de joueur
+  redisClient.del("player");
+}, 1000 * 60 * 10);
+
+setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
-  sendXpBubble();
-  sendHealthBubble();
+  workerXp.postMessage({});
+  workerHealth.postMessage({});
 }, 75);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   sendBullet();
-  sendPlayer();
-}, 50);
+  workerPlayer.postMessage({});
+}, 20);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages
@@ -170,64 +191,6 @@ httpServer.listen(port, () => {
   console.log(`Serveur websocket en cours d'exécution sur le port ${port}`);
 });
 
-const sendXpBubble = () => {
-  redisClient.hgetall("xpBubble", (err, data) => {
-    if (err) {
-      console.error(
-        "Erreur lors de la récupération des données depuis Redis",
-        err
-      );
-      return;
-    }
-
-    // Si pas assez de bulles d'expérience, en créer une nouvelle
-    if (Object.keys(data).length < nXpBubble) {
-      for (let i = 0; i < nXpBubble - Object.keys(data).length; i++) {
-        createXpBubble();
-      }
-    }
-
-    // Envoyer les données aux clients via les connexions WebSocket
-    io.sockets.emit("xpBubble", data);
-  });
-};
-
-const sendHealthBubble = () => {
-  redisClient.hgetall("healthBubble", (err, data) => {
-    if (err) {
-      console.error(
-        "Erreur lors de la récupération des données depuis Redis",
-        err
-      );
-      return;
-    }
-
-    // Si pas assez de bulles de vie, en créer une nouvelle
-    if (Object.keys(data).length < nHealthBubble) {
-      for (let i = 0; i < nHealthBubble - Object.keys(data).length; i++) {
-        createHealthBubble();
-      }
-    }
-
-    // Envoyer les données aux clients via les connexions WebSocket
-    io.sockets.emit("healthBubble", data);
-  });
-};
-const sendPlayer = () => {
-  redisClient.hgetall("player", (err, data) => {
-    if (err) {
-      console.error(
-        "Erreur lors de la récupération des données depuis Redis",
-        err
-      );
-      return;
-    }
-
-    // Envoyer les données aux clients via les connexions WebSocket
-    io.sockets.emit("player", data);
-  });
-};
-
 const sendMessages = () => {
   redisClient.lrange("message", 0, nMessage, (err, data) => {
     if (err) {
@@ -256,38 +219,4 @@ const sendBullet = () => {
     // Envoyer les données aux clients via les connexions WebSocket
     io.sockets.emit("allBullet", data);
   });
-};
-
-const createXpBubble = () => {
-  let randomPosX = Math.floor(Math.random() * 1000 - 500);
-  let randomPosY = Math.floor(Math.random() * 1000 - 500);
-  let newXpBubble = {
-    worldPosX: randomPosX,
-    worldPosY: randomPosY,
-    xp: 5,
-  };
-  redisClient.hset(
-    "xpBubble",
-    JSON.stringify(newXpBubble.worldPosX) +
-      ";" +
-      JSON.stringify(newXpBubble.worldPosY),
-    JSON.stringify(newXpBubble)
-  );
-};
-
-const createHealthBubble = () => {
-  let randomPosX = Math.floor(Math.random() * 1000 - 500);
-  let randomPosY = Math.floor(Math.random() * 1000 - 500);
-  let newXpBubble = {
-    worldPosX: randomPosX,
-    worldPosY: randomPosY,
-    health: 25,
-  };
-  redisClient.hset(
-    "healthBubble",
-    JSON.stringify(newXpBubble.worldPosX) +
-      ";" +
-      JSON.stringify(newXpBubble.worldPosY),
-    JSON.stringify(newXpBubble)
-  );
 };
