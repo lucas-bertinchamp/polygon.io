@@ -40,6 +40,7 @@ let nMessage = 20;
 const workerXp = new Worker("./workerXp.js");
 const workerHealth = new Worker("./workerHealth.js");
 const workerPlayer = new Worker("./workerPlayer.js");
+const workerBullet = new Worker("./workerBullet.js");
 
 workerXp.on("message", (data) => {
   io.emit("xpBubble", data);
@@ -51,6 +52,10 @@ workerHealth.on("message", (data) => {
 
 workerPlayer.on("message", (data) => {
   io.emit("player", data);
+});
+
+workerBullet.on("message", (data) => {
+  io.emit("bullet", data);
 });
 
 // Connexion à la base de données Redis
@@ -69,7 +74,7 @@ setInterval(() => {
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
-  sendBullet();
+  workerBullet.postMessage({});
   workerPlayer.postMessage({});
 }, 20);
 
@@ -203,20 +208,5 @@ const sendMessages = () => {
 
     // Envoyer les données aux clients via les connexions WebSocket
     io.sockets.emit("messageList", data);
-  });
-};
-
-const sendBullet = () => {
-  redisClient.hgetall("bullet", (err, data) => {
-    if (err) {
-      console.error(
-        "Erreur lors de la récupération des données depuis Redis",
-        err
-      );
-      return;
-    }
-
-    // Envoyer les données aux clients via les connexions WebSocket
-    io.sockets.emit("allBullet", data);
   });
 };

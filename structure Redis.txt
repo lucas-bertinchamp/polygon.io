@@ -2,7 +2,7 @@ xpBubble : dictionnaire ayant pour clé "worldPosX;worldPosY". Chaque élément 
 
 healthBubble : dictionnaire ayant pour clé "worldPosX;worldPosY". Chaque élément est de la forme {worldPosX, worldPosY, hp}
 
-player : dictionnaire ayant pour clé l'id du socket du joueur. Chaque élément est de la forme {nom, couleur, worldPosX, worldPosY, level, hp, xp, ammo }
+player : dictionnaire ayant pour clé l'id du socket du joueur. Chaque élément est de la forme {id, nom, couleur, worldPosX, worldPosY, level, hp, xp, ammo }
 
 message : liste de messages dont les plus récents sont sur la gauche
 
