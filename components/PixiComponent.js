@@ -60,8 +60,8 @@ const PixiComponent = ({ gameData }) => {
     let player = Player(
       app.screen.width / 2,
       app.screen.height / 2,
-      Math.floor(Math.random() * window.innerWidth - window.innerWidth / 2),
-      Math.floor(Math.random() * window.innerHeight - window.innerHeight / 2),
+      Math.floor(Math.random() * worldWidth - worldWidth / 2),
+      Math.floor(Math.random() * worldHeight - worldHeight / 2),
       1,
       playerColorCoded,
       healthByLevel[1],
