@@ -11,7 +11,7 @@ const LifeBubble = (posX, posY, worldPosX, worldPosY) => {
   return {
     sprite: bubbleSprite,
     worldPos: { x: worldPosX, y: worldPosY },
-    lifeValue: 50,
+    lifeValue: 25,
   };
 };
 

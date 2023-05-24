@@ -11,7 +11,7 @@ const XpBubble = (posX, posY, worldPosX, worldPosY) => {
   return {
     sprite: bubbleSprite,
     worldPos: { x: worldPosX, y: worldPosY },
-    xpValue: 5,
+    xpValue: 2,
   };
 };
 

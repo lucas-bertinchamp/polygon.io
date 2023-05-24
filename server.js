@@ -83,6 +83,10 @@ setInterval(() => {
   sendMessages();
 }, 500);
 
+setInterval(() => {
+  sendLeaderboard();
+}, 5000);
+
 // Gestion des connexions websocket
 io.on("connection", (socket) => {
   console.log("Nouvelle connexion websocket");
@@ -208,5 +212,26 @@ const sendMessages = () => {
 
     // Envoyer les données aux clients via les connexions WebSocket
     io.sockets.emit("messageList", data);
+  });
+};
+
+const sendLeaderboard = () => {
+  redisClient.hgetall("player", (err, data) => {
+    if (err) {
+      console.error(
+        "Erreur lors de la récupération des données depuis Redis",
+        err
+      );
+      return;
+    }
+
+    let parsedValues = Object.values(data).map((value) => {
+      return JSON.parse(value);
+    });
+    let values = Object.values(parsedValues).sort((a, b) => {
+      return b.xp - a.xp;
+    });
+    // Envoyer les données aux clients via les connexions WebSocket
+    io.sockets.emit("leaderboard", values);
   });
 };

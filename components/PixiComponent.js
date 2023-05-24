@@ -174,16 +174,22 @@ const PixiComponent = ({ gameData }) => {
           app.stage.removeChild(bubble.sprite);
         }
       });
-      let temporaryBubbles = Object.values(data).map((bubble) => {
-        bubble = JSON.parse(bubble);
-        return XpBubble(
-          null,
-          null,
-          bubble.worldPosX,
-          bubble.worldPosY,
-          bubble.xp
-        );
-      });
+      let temporaryBubbles = Object.values(data)
+        .map((bubble) => {
+          bubble = JSON.parse(bubble);
+          let distX = bubble.worldPosX - player.worldPos.x;
+          let distY = bubble.worldPosY - player.worldPos.y;
+          if (distX < window.innerWidth / 2 && distY < window.innerHeight / 2) {
+            return XpBubble(
+              null,
+              null,
+              bubble.worldPosX,
+              bubble.worldPosY,
+              bubble.xp
+            );
+          }
+        })
+        .filter((bubble) => bubble !== undefined);
       xpBubbleList = temporaryBubbles;
     });
 
@@ -195,16 +201,22 @@ const PixiComponent = ({ gameData }) => {
           app.stage.removeChild(bubble.sprite);
         }
       });
-      let temporaryBubbles = Object.values(data).map((bubble) => {
-        bubble = JSON.parse(bubble);
-        return LifeBubble(
-          null,
-          null,
-          bubble.worldPosX,
-          bubble.worldPosY,
-          bubble.xp
-        );
-      });
+      let temporaryBubbles = Object.values(data)
+        .map((bubble) => {
+          bubble = JSON.parse(bubble);
+          let distX = bubble.worldPosX - player.worldPos.x;
+          let distY = bubble.worldPosY - player.worldPos.y;
+          if (distX < window.innerWidth / 2 && distY < window.innerHeight / 2) {
+            return LifeBubble(
+              null,
+              null,
+              bubble.worldPosX,
+              bubble.worldPosY,
+              bubble.hp
+            );
+          }
+        })
+        .filter((bubble) => bubble !== undefined);
       healthBubbleList = temporaryBubbles;
     });
 
@@ -260,7 +272,6 @@ const PixiComponent = ({ gameData }) => {
 
       //Envoie la postion du joueur au serveur
       if (socketClient.connected) {
-        console.log(player.worldPos.x, player.worldPos.y);
         socketClient.emit("updatePlayer", {
           id: socketClient.id,
           name: player.name,
@@ -617,7 +628,7 @@ const PixiComponent = ({ gameData }) => {
     <div ref={pixiContainerRef}>
       <Chat socket={socketClient} />
       <Bars barsData={barsUtils.barsData} />
-      <Leaderboard testLeaderboardData={testLeaderboardData} />
+      <Leaderboard socket={socketClient} />
     </div>
   );
 };

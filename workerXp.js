@@ -33,7 +33,7 @@ const createXpBubble = () => {
   let newXpBubble = {
     worldPosX: randomPosX,
     worldPosY: randomPosY,
-    xp: 5,
+    xp: 2,
   };
   redisClient.hset(
     "xpBubble",
