@@ -44,13 +44,13 @@ setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   sendXpBubble();
   sendHealthBubble();
-}, 50);
+}, 75);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   sendBullet();
   sendPlayer();
-}, 20);
+}, 50);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages
