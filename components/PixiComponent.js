@@ -9,12 +9,14 @@ import BarsUtils from "./utils/BarsUtils";
 import Leaderboard from "./Leaderboard";
 import { io } from "socket.io-client";
 import Chat from "./Chat";
+import XpBubbleUtils from "./utils/XpBubbleUtils";
 
 const socketClient = io();
 
 const PixiComponent = ({ gameData }) => {
   // interact with the bars
   let barsUtils = BarsUtils();
+  let xpBubbleUtils = XpBubbleUtils(socketClient);
 
   let dataPlayerName = gameData.playerName;
   let dataPlayerColor = gameData.playerColor;

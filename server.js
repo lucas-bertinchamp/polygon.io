@@ -43,7 +43,7 @@ const workerPlayer = new Worker("./workerPlayer.js");
 const workerBullet = new Worker("./workerBullet.js");
 
 workerXp.on("message", (data) => {
-  io.emit("xpBubble", data);
+  io.emit("addXpBubble", data);
 });
 
 workerHealth.on("message", (data) => {
@@ -149,6 +149,11 @@ io.on("connection", (socket) => {
       // Enregistrer le message dans la base de données Redis
       redisClient.lpush("message", message);
     });
+  });
+
+  socket.on("deleteXpBubble", (data) => {
+    redisClient.del("xpBubble", data);
+    io.sockets.emit("deleteXpBubble", data);
   });
 
   socket.on("addBullet", (data) => {
