@@ -42,6 +42,13 @@ const workerHealth = new Worker("./workerHealth.js");
 const workerPlayer = new Worker("./workerPlayer.js");
 const workerBullet = new Worker("./workerBullet.js");
 
+redisClient.del("player");
+redisClient.del("bullet");
+redisClient.del("xpBubble");
+redisClient.del("healthBubble");
+
+redisClient.sadd("xpBubble", "0;0");
+
 workerXp.on("message", (data) => {
   io.emit("server:addXpBubble", data);
 });
