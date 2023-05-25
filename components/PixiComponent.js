@@ -104,7 +104,7 @@ const PixiComponent = ({ gameData }) => {
             dy,
             null,
             null,
-            10,
+            20,
             player.color,
             5
           );
@@ -203,9 +203,10 @@ const PixiComponent = ({ gameData }) => {
     let xpBubbleList = [];
     let healthBubbleList = [];
 
+    app.ticker.maxFPS = 45;
     // Boucle du jeu
     app.ticker.add(() => {
-      const speed = 7.5;
+      const speed = 15;
 
       //Actualise la position du joueur dans le monde
       const cursorX = (mousePos.x - app.screen.width / 2) / app.screen.width;
@@ -474,7 +475,7 @@ const PixiComponent = ({ gameData }) => {
             missile.dY,
             missile.worldPosX,
             missile.worldPosY,
-            10,
+            20,
             missile.color,
             missile.dmgValue
           );

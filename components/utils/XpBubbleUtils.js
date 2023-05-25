@@ -4,8 +4,6 @@ const XpBubbleUtils = ({ socket }) => {
   let clientSocket = socket;
   let xpBubbleList = new Set();
 
-  socket.emit("client:initialXpBubble");
-
   clientSocket.on("server:deleteXpBubble", (message) => {
     let x = parseInt(message.split(";")[0]);
     let y = parseInt(message.split(";")[1]);
