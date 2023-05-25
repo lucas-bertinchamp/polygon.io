@@ -6,7 +6,6 @@ const Leaderboard = ({ socket }) => {
   // Gestion du leaderboard
 
   socket.on("leaderboard", (data) => {
-    console.log(data);
     setLeaderboardData(data);
   });
 

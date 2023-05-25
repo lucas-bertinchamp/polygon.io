@@ -43,11 +43,11 @@ const workerPlayer = new Worker("./workerPlayer.js");
 const workerBullet = new Worker("./workerBullet.js");
 
 workerXp.on("message", (data) => {
-  io.emit("addXpBubble", data);
+  io.emit("server:addXpBubble", data);
 });
 
 workerHealth.on("message", (data) => {
-  io.emit("healthBubble", data);
+  io.emit("server:addHealthBubble", data);
 });
 
 workerPlayer.on("message", (data) => {
@@ -93,22 +93,32 @@ io.on("connection", (socket) => {
   sockets.push(socket);
   console.log(`Il y a ${sockets.length} connexions websocket`);
 
-  socket.on("deleteXpBubble", (socket) => {
-    redisClient.hdel(
-      "xpBubble",
-      JSON.stringify(socket.xpBubblePosX) +
-        ";" +
-        JSON.stringify(socket.xpBubblePosY)
-    );
+  redisClient.smembers("xpBubble", (err, res) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+      socket.emit("server:initialXpBubble", res);
+    }
   });
 
-  socket.on("deleteHealthBubble", (socket) => {
-    redisClient.hdel(
-      "healthBubble",
-      JSON.stringify(socket.healthBubblePosX) +
-        ";" +
-        JSON.stringify(socket.healthBubblePosY)
-    );
+  redisClient.smembers("healthBubble", (err, res) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+      socket.emit("server:initialHealthBubble", res);
+    }
+  });
+
+  socket.on("client:deleteXpBubble", (message) => {
+    redisClient.srem("xpBubble", message);
+    io.sockets.emit("server:deleteXpBubble", message);
+  });
+
+  socket.on("client:deleteHealthBubble", (message) => {
+    redisClient.srem("healthBubble", message);
+    io.sockets.emit("server:deleteHealthBubble", message);
   });
 
   socket.on("updatePlayer", (socket) => {
@@ -149,11 +159,6 @@ io.on("connection", (socket) => {
       // Enregistrer le message dans la base de données Redis
       redisClient.lpush("message", message);
     });
-  });
-
-  socket.on("deleteXpBubble", (data) => {
-    redisClient.del("xpBubble", data);
-    io.sockets.emit("deleteXpBubble", data);
   });
 
   socket.on("addBullet", (data) => {
