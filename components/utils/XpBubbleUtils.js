@@ -29,6 +29,10 @@ const XpBubbleUtils = ({ socket }) => {
     });
   });
 
+  const initialization = () => {
+    clientSocket.emit("client:initialXpBubble");
+  };
+
   const deleteXpBubble = (message) => {
     let bubble = JSON.stringify({
       worldPosX: message.worldPos.x,
@@ -68,7 +72,12 @@ const XpBubbleUtils = ({ socket }) => {
       });
     return printableXpBubbleList;
   };
-  return { getXpBubbleList, getPrintableXpBubbleList, deleteXpBubble };
+  return {
+    initialization,
+    getXpBubbleList,
+    getPrintableXpBubbleList,
+    deleteXpBubble,
+  };
 };
 
 export default XpBubbleUtils;

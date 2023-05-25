@@ -31,6 +31,10 @@ const HealthBubbleUtils = ({ socket }) => {
     });
   });
 
+  const initialization = () => {
+    clientSocket.emit("client:initialHealthBubble");
+  };
+
   const deleteHealthBubble = (message) => {
     let bubble = JSON.stringify({
       worldPosX: message.worldPos.x,
@@ -71,6 +75,7 @@ const HealthBubbleUtils = ({ socket }) => {
     return printableHealthBubbleList;
   };
   return {
+    initialization,
     getHealthBubbleList,
     getPrintableHealthBubbleList,
     deleteHealthBubble,

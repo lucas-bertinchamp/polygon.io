@@ -100,14 +100,16 @@ io.on("connection", (socket) => {
 
   // ------------------------- Event Expérience ------------------------- //
 
-  redisClient.smembers("xpBubble", (err, res) => {
-    if (err) {
-      console.log(err);
-    } else {
-      socket.emit("server:initialXpBubble", res);
-      console.log("ici");
-      console.log(res);
-    }
+  socket.on("client:initialXpBubble", (message) => {
+    redisClient.smembers("xpBubble", (err, res) => {
+      if (err) {
+        console.log(err);
+      } else {
+        socket.emit("server:initialXpBubble", res);
+        console.log("ici");
+        console.log(res);
+      }
+    });
   });
 
   socket.on("client:deleteXpBubble", (message) => {
@@ -117,12 +119,14 @@ io.on("connection", (socket) => {
 
   // ------------------------- Event Vie ------------------------- //
 
-  redisClient.smembers("healthBubble", (err, res) => {
-    if (err) {
-      console.log(err);
-    } else {
-      socket.emit("server:initialHealthBubble", res);
-    }
+  socket.on("client:initialHealthBubble", (message) => {
+    redisClient.smembers("healthBubble", (err, res) => {
+      if (err) {
+        console.log(err);
+      } else {
+        socket.emit("server:initialHealthBubble", res);
+      }
+    });
   });
 
   socket.on("client:deleteHealthBubble", (message) => {

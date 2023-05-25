@@ -200,8 +200,11 @@ const PixiComponent = ({ gameData }) => {
       playerList = temporaryPlayers;
     });
 
+    // Initialiser les bulles
     let xpBubbleList = [];
+    xpBubbleUtils.initialization();
     let healthBubbleList = [];
+    healthBubbleUtils.initialization();
 
     app.ticker.maxFPS = 45;
     // Boucle du jeu
