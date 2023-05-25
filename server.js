@@ -106,6 +106,7 @@ io.on("connection", (socket) => {
     } else {
       socket.emit("server:initialXpBubble", res);
       console.log("ici");
+      console.log(res);
     }
   });
 
