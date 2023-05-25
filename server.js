@@ -81,7 +81,7 @@ setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   workerBullet.postMessage({});
   workerPlayer.postMessage({});
-}, 35);
+}, 30);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages
@@ -106,8 +106,6 @@ io.on("connection", (socket) => {
         console.log(err);
       } else {
         socket.emit("server:initialXpBubble", res);
-        console.log("ici");
-        console.log(res);
       }
     });
   });

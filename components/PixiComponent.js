@@ -298,6 +298,7 @@ const PixiComponent = ({ gameData }) => {
         if (distX < 45 && distY < 45) {
           app.stage.removeChild(bubble.sprite);
           player.xpValue += bubble.xpValue;
+          player.xpTotal += bubble.xpValue;
           xpBubbleUtils.deleteXpBubble(bubble);
           // update the bar
           barsUtils.setBarValue(2, player.xpValue);
@@ -377,33 +378,6 @@ const PixiComponent = ({ gameData }) => {
         // changer le nom de la barre d'XP
         barsUtils.setBarName(2, "XP " + player.level);
       }
-
-      //Enlever toutes les bulles
-      healthBubbleList.forEach((bubble) => {
-        app.stage.removeChild(bubble.sprite);
-      });
-
-      //Actualise la position des bulles sur l'écran
-      healthBubbleList.forEach((bubble) => {
-        const distX = Math.abs(bubble.worldPos.x - player.worldPos.x);
-        const distY = Math.abs(bubble.worldPos.y - player.worldPos.y);
-
-        if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
-          bubble.sprite.x =
-            player.sprite.x + bubble.worldPos.x - player.worldPos.x;
-          bubble.sprite.y =
-            player.sprite.y + bubble.worldPos.y - player.worldPos.y;
-        } else {
-          bubble.sprite.x = null;
-          bubble.sprite.y = null;
-        }
-      });
-
-      healthBubbleList.forEach((bubble) => {
-        if (bubble.sprite.x !== null && bubble.sprite.y !== null) {
-          app.stage.addChild(bubble.sprite);
-        }
-      });
 
       //Enlever les missiles
       ownBullet.forEach((missile) => {

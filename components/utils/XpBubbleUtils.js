@@ -3,29 +3,19 @@ import XpBubble from "../XpBubble";
 const XpBubbleUtils = ({ socket }) => {
   let clientSocket = socket;
   let xpBubbleList = new Set();
+  let onBoardMap = new Map();
 
   clientSocket.on("server:deleteXpBubble", (message) => {
-    let x = parseInt(message.split(";")[0]);
-    let y = parseInt(message.split(";")[1]);
-    xpBubbleList.delete(
-      JSON.stringify({ worldPosX: x, worldPosY: y, xpVal: 2 })
-    );
+    xpBubbleList.delete(message);
   });
 
   clientSocket.on("server:addXpBubble", (message) => {
-    let x = parseInt(message.split(";")[0]);
-    let y = parseInt(message.split(";")[1]);
-    xpBubbleList.add(JSON.stringify({ worldPosX: x, worldPosY: y, xpVal: 2 }));
+    xpBubbleList.add(message);
   });
 
   clientSocket.on("server:initialXpBubble", (message) => {
-    console.log(message);
     message.forEach((xpBubble) => {
-      let x = parseInt(xpBubble.split(";")[0]);
-      let y = parseInt(xpBubble.split(";")[1]);
-      xpBubbleList.add(
-        JSON.stringify({ worldPosX: x, worldPosY: y, xpVal: 2 })
-      );
+      xpBubbleList.add(xpBubble);
     });
   });
 
@@ -34,16 +24,11 @@ const XpBubbleUtils = ({ socket }) => {
   };
 
   const deleteXpBubble = (message) => {
-    let bubble = JSON.stringify({
-      worldPosX: message.worldPos.x,
-      worldPosY: message.worldPos.y,
-      xpVal: 2,
-    });
-    xpBubbleList.delete(bubble);
     let stringBubble =
       JSON.stringify(message.worldPos.x) +
       ";" +
       JSON.stringify(message.worldPos.y);
+    xpBubbleList.delete(stringBubble);
     clientSocket.emit("client:deleteXpBubble", stringBubble);
   };
 
@@ -52,26 +37,34 @@ const XpBubbleUtils = ({ socket }) => {
   };
 
   const getPrintableXpBubbleList = (player, width, height) => {
-    let printableXpBubbleList = [...xpBubbleList]
-      .map((xpBubble) => {
-        xpBubble = JSON.parse(xpBubble);
-        let distX = Math.abs(xpBubble.worldPosX - player.worldPos.x);
-        let distY = Math.abs(xpBubble.worldPosY - player.worldPos.y);
-        if (distX < width / 2 && distY < height / 2) {
-          return XpBubble(
-            xpBubble.worldPosX - player.worldPos.x + width / 2,
-            xpBubble.worldPosY - player.worldPos.y + height / 2,
-            xpBubble.worldPosX,
-            xpBubble.worldPosY,
-            xpBubble.xpVal
+    let onBoardMap2 = new Map();
+    for (let b of xpBubbleList) {
+      let worldX = parseInt(b.split(";")[0]);
+      let worldY = parseInt(b.split(";")[1]);
+      let distX = Math.abs(worldX - player.worldPos.x);
+      let distY = Math.abs(worldY - player.worldPos.y);
+      if (distX < width / 2 && distY < height / 2) {
+        if (!(onBoardMap.get(b) !== undefined)) {
+          let element = XpBubble(
+            worldX + width / 2 - player.worldPos.x,
+            worldY + height / 2 - player.worldPos.y,
+            worldX,
+            worldY
           );
+          onBoardMap2.set(b, element);
+        } else {
+          let element = onBoardMap.get(b);
+          element.sprite.x = element.worldPos.x + width / 2 - player.worldPos.x;
+          element.sprite.y =
+            element.worldPos.y + height / 2 - player.worldPos.y;
+          onBoardMap2.set(b, element);
         }
-      })
-      .filter((xpBubble) => {
-        return xpBubble !== undefined;
-      });
-    return printableXpBubbleList;
+      }
+    }
+    onBoardMap = onBoardMap2;
+    return [...onBoardMap.values()];
   };
+
   return {
     initialization,
     getXpBubbleList,

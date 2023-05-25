@@ -2,7 +2,7 @@ const Redis = require("ioredis");
 const redisClient = Redis.createClient(process.env.REDIS_URL);
 const { workerData, parentPort } = require("worker_threads");
 
-let nXpBubble = 0;
+let nXpBubble = 100;
 
 parentPort.on("message", (msg) => {
   checkXpBubble();

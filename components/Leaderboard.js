@@ -7,36 +7,8 @@ const Leaderboard = ({ socket }) => {
 
   socket.on("leaderboard", (data) => {
     setLeaderboardData(data);
+    console.log(data);
   });
-
-  /*const [leaderboardData, setLeaderboardData] = useState([]);
-
-    useEffect(() => {
-        // Fetch leaderboard data from API
-        fetchLeaderboardData();
-    }, []);
-
-    const fetchLeaderboardData = async () => {
-        try {
-            // Make an API request to fetch leaderboard data
-            const response = await fetch("/api/leaderboard"); // Replace with your API endpoint
-            const data = await response.json();
-
-            // Update the leaderboard data state
-            setLeaderboardData(
-                data.sort((a, b) => b.score - a.score).slice(0, 10)
-            );
-        } catch (error) {
-            // If there's an error, set the leaderboard data to the test data
-            // TEST DATA !!
-            setLeaderboardData(
-                testLeaderboardData
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, 10)
-            );
-            console.log("Error fetching leaderboard data:", error);
-        }
-    }; */
 
   return (
     <div className={style.leaderboard}>

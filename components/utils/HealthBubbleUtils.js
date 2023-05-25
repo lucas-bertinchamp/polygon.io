@@ -1,33 +1,22 @@
 import LifeBubble from "../LifeBubble";
-import HealthBubble from "../LifeBubble";
 
 const HealthBubbleUtils = ({ socket }) => {
   let clientSocket = socket;
   let healthBubbleList = new Set();
+  let onBoardMap = new Map();
 
   clientSocket.on("server:deleteHealthBubble", (message) => {
-    let x = parseInt(message.split(";")[0]);
-    let y = parseInt(message.split(";")[1]);
-    healthBubbleList.delete(
-      JSON.stringify({ worldPosX: x, worldPosY: y, xpVal: 2 })
-    );
+    console.log("message : " + message);
+    healthBubbleList.delete(message);
   });
 
   clientSocket.on("server:addHealthBubble", (message) => {
-    let x = parseInt(message.split(";")[0]);
-    let y = parseInt(message.split(";")[1]);
-    healthBubbleList.add(
-      JSON.stringify({ worldPosX: x, worldPosY: y, healthVal: 2 })
-    );
+    healthBubbleList.add(message);
   });
 
   clientSocket.on("server:initialHealthBubble", (message) => {
     message.forEach((healthBubble) => {
-      let x = parseInt(healthBubble.split(";")[0]);
-      let y = parseInt(healthBubble.split(";")[1]);
-      healthBubbleList.add(
-        JSON.stringify({ worldPosX: x, worldPosY: y, healthVal: 2 })
-      );
+      healthBubbleList.add(healthBubble);
     });
   });
 
@@ -36,16 +25,11 @@ const HealthBubbleUtils = ({ socket }) => {
   };
 
   const deleteHealthBubble = (message) => {
-    let bubble = JSON.stringify({
-      worldPosX: message.worldPos.x,
-      worldPosY: message.worldPos.y,
-      healthVal: 2,
-    });
-    healthBubbleList.delete(bubble);
     let stringBubble =
       JSON.stringify(message.worldPos.x) +
       ";" +
       JSON.stringify(message.worldPos.y);
+    healthBubbleList.delete(stringBubble);
     clientSocket.emit("client:deleteHealthBubble", stringBubble);
   };
 
@@ -54,26 +38,34 @@ const HealthBubbleUtils = ({ socket }) => {
   };
 
   const getPrintableHealthBubbleList = (player, width, height) => {
-    let printableHealthBubbleList = [...healthBubbleList]
-      .map((healthBubble) => {
-        healthBubble = JSON.parse(healthBubble);
-        let distX = Math.abs(healthBubble.worldPosX - player.worldPos.x);
-        let distY = Math.abs(healthBubble.worldPosY - player.worldPos.y);
-        if (distX < width / 2 && distY < height / 2) {
-          return LifeBubble(
-            healthBubble.worldPosX - player.worldPos.x + width / 2,
-            healthBubble.worldPosY - player.worldPos.y + height / 2,
-            healthBubble.worldPosX,
-            healthBubble.worldPosY,
-            healthBubble.healthVal
+    let onBoardMap2 = new Map();
+    for (let b of healthBubbleList) {
+      let worldX = parseInt(b.split(";")[0]);
+      let worldY = parseInt(b.split(";")[1]);
+      let distX = Math.abs(worldX - player.worldPos.x);
+      let distY = Math.abs(worldY - player.worldPos.y);
+      if (distX < width / 2 && distY < height / 2) {
+        if (!(onBoardMap.get(b) !== undefined)) {
+          let element = LifeBubble(
+            worldX + width / 2 - player.worldPos.x,
+            worldY + height / 2 - player.worldPos.y,
+            worldX,
+            worldY
           );
+          onBoardMap2.set(b, element);
+        } else {
+          let element = onBoardMap.get(b);
+          element.sprite.x = element.worldPos.x + width / 2 - player.worldPos.x;
+          element.sprite.y =
+            element.worldPos.y + height / 2 - player.worldPos.y;
+          onBoardMap2.set(b, element);
         }
-      })
-      .filter((healthBubble) => {
-        return healthBubble !== undefined;
-      });
-    return printableHealthBubbleList;
+      }
+    }
+    onBoardMap = onBoardMap2;
+    return [...onBoardMap.values()];
   };
+
   return {
     initialization,
     getHealthBubbleList,
