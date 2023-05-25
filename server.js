@@ -75,13 +75,13 @@ setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   workerXp.postMessage({});
   workerHealth.postMessage({});
-}, 75);
+}, 100);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   workerBullet.postMessage({});
   workerPlayer.postMessage({});
-}, 20);
+}, 35);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages
