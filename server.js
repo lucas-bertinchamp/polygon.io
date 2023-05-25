@@ -42,13 +42,6 @@ const workerHealth = new Worker("./workerHealth.js");
 const workerPlayer = new Worker("./workerPlayer.js");
 const workerBullet = new Worker("./workerBullet.js");
 
-redisClient.del("player");
-redisClient.del("bullet");
-redisClient.del("xpBubble");
-redisClient.del("healthBubble");
-
-redisClient.sadd("xpBubble", "0;0");
-
 workerXp.on("message", (data) => {
   io.emit("server:addXpBubble", data);
 });
@@ -67,6 +60,11 @@ workerBullet.on("message", (data) => {
 
 // Connexion à la base de données Redis
 const redisClient = Redis.createClient(process.env.REDIS_URL);
+redisClient.del("player");
+redisClient.del("bullet");
+redisClient.del("xpBubble");
+redisClient.del("healthBubble");
+redisClient.sadd("xpBubble", "0;0");
 
 setInterval(() => {
   // Supprimer la base de données de joueur
@@ -108,6 +106,7 @@ io.on("connection", (socket) => {
         console.log(err);
       } else {
         socket.emit("server:initialXpBubble", res);
+        console.log(res);
       }
     });
   });

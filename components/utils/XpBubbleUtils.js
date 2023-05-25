@@ -21,6 +21,7 @@ const XpBubbleUtils = ({ socket }) => {
   });
 
   clientSocket.on("server:initialXpBubble", (message) => {
+    console.log(message);
     message.forEach((xpBubble) => {
       let x = parseInt(xpBubble.split(";")[0]);
       let y = parseInt(xpBubble.split(";")[1]);
