@@ -5,6 +5,8 @@ const HealthBubbleUtils = ({ socket }) => {
   let clientSocket = socket;
   let healthBubbleList = new Set();
 
+  socket.emit("client:initialHealthBubble");
+
   clientSocket.on("server:deleteHealthBubble", (message) => {
     let x = parseInt(message.split(";")[0]);
     let y = parseInt(message.split(";")[1]);

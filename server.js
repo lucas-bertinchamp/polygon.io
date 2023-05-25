@@ -93,27 +93,33 @@ io.on("connection", (socket) => {
   sockets.push(socket);
   console.log(`Il y a ${sockets.length} connexions websocket`);
 
-  redisClient.smembers("xpBubble", (err, res) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(res);
-      socket.emit("server:initialXpBubble", res);
-    }
-  });
+  // ------------------------- Event Expérience ------------------------- //
 
-  redisClient.smembers("healthBubble", (err, res) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(res);
-      socket.emit("server:initialHealthBubble", res);
-    }
+  socket.on("client:initialXpBubble", (message) => {
+    redisClient.smembers("xpBubble", (err, res) => {
+      if (err) {
+        console.log(err);
+      } else {
+        socket.emit("server:initialXpBubble", res);
+      }
+    });
   });
 
   socket.on("client:deleteXpBubble", (message) => {
     redisClient.srem("xpBubble", message);
     io.sockets.emit("server:deleteXpBubble", message);
+  });
+
+  // ------------------------- Event Vie ------------------------- //
+
+  socket.on("client:initialHealthBubble", (message) => {
+    redisClient.smembers("healthBubble", (err, res) => {
+      if (err) {
+        console.log(err);
+      } else {
+        socket.emit("server:initialHealthBubble", res);
+      }
+    });
   });
 
   socket.on("client:deleteHealthBubble", (message) => {
