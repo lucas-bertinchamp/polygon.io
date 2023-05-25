@@ -206,7 +206,7 @@ const PixiComponent = ({ gameData }) => {
     let healthBubbleList = [];
     healthBubbleUtils.initialization();
 
-    app.ticker.maxFPS = 45;
+    app.ticker.maxFPS = 100;
     // Boucle du jeu
     app.ticker.add(() => {
       const speed = 15;
