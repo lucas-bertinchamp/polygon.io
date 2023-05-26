@@ -3,10 +3,10 @@ const redisClient = Redis.createClient(process.env.REDIS_URL);
 const { workerData, parentPort } = require("worker_threads");
 
 parentPort.on("message", (msg) => {
-  sendBullet(msg);
+  sendBullet();
 });
 
-const sendBullet = (toAvoid) => {
+const sendBullet = () => {
   redisClient.hgetall("bullet", (err, data) => {
     if (err) {
       console.error(
@@ -16,11 +16,7 @@ const sendBullet = (toAvoid) => {
       return;
     }
 
-    const values = Object.entries(data)
-      .map(([key, value]) => {
-        return !toAvoid.has(key) ? value : null;
-      })
-      .filter((value) => value !== null);
+    const values = Object.values(data);
 
     // Envoyer les données aux clients via les connexions WebSocket
     parentPort.postMessage(values);

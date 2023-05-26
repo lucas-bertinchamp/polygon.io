@@ -37,8 +37,6 @@ const io = socketIo(httpServer);
 
 let nMessage = 20;
 
-const bulletToAvoid = new Set();
-
 const workerXp = new Worker("./workerXp.js");
 const workerHealth = new Worker("./workerHealth.js");
 const workerPlayer = new Worker("./workerPlayer.js");
@@ -81,7 +79,7 @@ setInterval(() => {
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
-  workerBullet.postMessage(bulletToAvoid);
+  workerBullet.postMessage({});
   workerPlayer.postMessage({});
 }, 25);
 
@@ -92,7 +90,6 @@ setInterval(() => {
 
 setInterval(() => {
   sendLeaderboard();
-  bulletToAvoid.clear();
 }, 5000);
 
 // Gestion des connexions websocket
