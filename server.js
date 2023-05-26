@@ -37,6 +37,8 @@ const io = socketIo(httpServer);
 
 let nMessage = 20;
 
+const bulletToAvoid = new Set();
+
 const workerXp = new Worker("./workerXp.js");
 const workerHealth = new Worker("./workerHealth.js");
 const workerPlayer = new Worker("./workerPlayer.js");
@@ -55,7 +57,7 @@ workerPlayer.on("message", (data) => {
 });
 
 workerBullet.on("message", (data) => {
-  io.emit("allBullet", data);
+  io.emit("server:allBullet", data);
 });
 
 // Connexion à la base de données Redis
@@ -79,9 +81,9 @@ setInterval(() => {
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
-  workerBullet.postMessage({});
+  workerBullet.postMessage(bulletToAvoid);
   workerPlayer.postMessage({});
-}, 30);
+}, 25);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages
@@ -90,6 +92,7 @@ setInterval(() => {
 
 setInterval(() => {
   sendLeaderboard();
+  bulletToAvoid.clear();
 }, 5000);
 
 // Gestion des connexions websocket
@@ -173,18 +176,15 @@ io.on("connection", (socket) => {
   });
 
   socket.on("addBullet", (data) => {
-    let bulletData = JSON.parse(data);
-    redisClient.hset("bullet", bulletData.key, bulletData.value);
+    redisClient.hset("bullet", data.key, data.value);
   });
 
   socket.on("deleteBullet", (data) => {
     redisClient.hdel("bullet", data);
   });
 
-  socket.on("deleteContactBullet", (data) => {
-    redisClient.hdel("bullet", data);
-
-    io.sockets.emit("deleteContactBullet", data);
+  socket.on("client:deleteContactBullet", (data) => {
+    bulletToAvoid.add(data);
   });
 
   // Gérez les événements de websocket ici

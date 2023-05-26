@@ -11,6 +11,7 @@ import { io } from "socket.io-client";
 import Chat from "./Chat";
 import XpBubbleUtils from "./utils/XpBubbleUtils";
 import HealthBubbleUtils from "./utils/HealthBubbleUtils";
+import BulletUtils from "./utils/BulletUtils";
 
 const socketClient = io();
 
@@ -19,6 +20,7 @@ const PixiComponent = ({ gameData }) => {
   let barsUtils = BarsUtils();
   let xpBubbleUtils = XpBubbleUtils({ socket: socketClient });
   let healthBubbleUtils = HealthBubbleUtils({ socket: socketClient });
+  let bulletUtils = BulletUtils({ socket: socketClient });
 
   let dataPlayerName = gameData.playerName;
   let dataPlayerColor = gameData.playerColor;
@@ -81,9 +83,9 @@ const PixiComponent = ({ gameData }) => {
       mousePos.y = e.clientY;
     };
 
-    let ownBullet = [];
     // Evenement déclenché si on clique
     window.onclick = (e) => {
+      // Créer un projectile
       if (player.level > 1) {
         let theta = (2 * Math.PI) / player.level;
         for (let i = 0; i < player.level; i++) {
@@ -97,41 +99,29 @@ const PixiComponent = ({ gameData }) => {
           let dx = Math.cos(theta_0 + theta * i);
           let dy = Math.sin(theta_0 + theta * i);
           let radius = (1.5 * player.sprite.height) / 2;
-          const missile = Projectile(
-            socketClient.id,
-            totalBullets,
-            dx,
-            dy,
-            null,
-            null,
-            20,
-            player.color,
-            5
-          );
-          missile.sprite.x = player.sprite.x + radius * dx;
-          missile.sprite.y = player.sprite.y + radius * dy;
-          missile.worldPos.x = player.worldPos.x + radius * dx;
-          missile.worldPos.y = player.worldPos.y + radius * dy;
+
           let key = JSON.stringify({ id: socketClient.id, num: totalBullets });
-          let value = JSON.stringify({
+
+          let value = {
             playerId: socketClient.id,
             num: totalBullets,
-            dX: dx,
-            dY: dy,
-            worldPosX: missile.worldPos.x,
-            worldPosY: missile.worldPos.y,
+            worldPosX: player.worldPos.x + radius * dx,
+            worldPosY: player.worldPos.y + radius * dy,
+            dx: dx,
+            dy: dy,
+            speed: 20,
             color: player.color,
-            dmgValue: missile.dmgValue,
-          });
-          let data = JSON.stringify({ key: key, value: value });
+            dmgValue: 5,
+          };
+
+          let data = JSON.stringify(value);
           // Envoyer la bullets au server
-          socketClient.emit("addBullet", data);
+          socketClient.emit("addBullet", { key: key, value: data });
           totalBullets++;
-          ownBullet.push(missile);
         }
       }
     };
-
+    /*
     let otherBulletParsed = [];
     let otherBullet = [];
     // Créer les projectiles des autres joueurs
@@ -139,13 +129,16 @@ const PixiComponent = ({ gameData }) => {
       otherBulletParsed = [];
       // Ne garder que les projectiles des autres joueurs
       Object.keys(data).forEach((key) => {
-        let parsedKey = JSON.parse(key);
-        if (parsedKey.id !== socketClient.id) {
-          let value = JSON.parse(data[key]);
-          value.playerId = parsedKey.id;
-          otherBulletParsed.push(value);
+        if (key !== "") {
+          let parsedKey = JSON.parse(key);
+          if (parsedKey.id !== socketClient.id) {
+            let value = JSON.parse(data[parsedKey]);
+            value.playerId = parsedKey.id;
+            otherBulletParsed.push(value);
+          }
         }
       });
+      console.log(otherBulletParsed);
     });
 
     socketClient.on("deleteContactBullet", (data) => {
@@ -168,7 +161,7 @@ const PixiComponent = ({ gameData }) => {
           otherBullet.splice(otherBullet.indexOf(bullet), 1);
         }
       });
-    });
+    });*/
 
     let playerList = [];
     //Créer des joueurs
@@ -205,6 +198,10 @@ const PixiComponent = ({ gameData }) => {
     xpBubbleUtils.initialization();
     let healthBubbleList = [];
     healthBubbleUtils.initialization();
+
+    // Initialiser les bullets des autres joueurs
+    let otherBullet = [];
+    let ownBullet = [];
 
     app.ticker.maxFPS = 100;
     // Boucle du jeu
@@ -379,90 +376,32 @@ const PixiComponent = ({ gameData }) => {
         barsUtils.setBarName(2, "XP " + player.level);
       }
 
-      //Enlever les missiles
-      ownBullet.forEach((missile) => {
-        app.stage.removeChild(missile.sprite);
-      });
+      // ---------------------- Bullets ----------------------
 
-      // Deplacer les missiles
-      ownBullet.forEach((missile) => {
-        missile.worldPos.x += missile.speed_x;
-        missile.worldPos.y += missile.speed_y;
-
-        let key = JSON.stringify({ id: socketClient.id, num: missile.num });
-        let value = JSON.stringify({
-          playerId: socketClient.id,
-          num: missile.num,
-          dX: missile.speed_x,
-          dY: missile.speed_y,
-          worldPosX: missile.worldPos.x,
-          worldPosY: missile.worldPos.y,
-          color: player.color,
-          dmgValue: missile.dmgValue,
-        });
-        let data = JSON.stringify({ key: key, value: value });
-        // Envoyer la bullet au server
-        socketClient.emit("addBullet", data);
-
-        const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
-        const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
-
-        if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
-          missile.sprite.x =
-            player.sprite.x + missile.worldPos.x - player.worldPos.x;
-          missile.sprite.y =
-            player.sprite.y + missile.worldPos.y - player.worldPos.y;
-        } else {
-          missile.sprite.x = null;
-          missile.sprite.y = null;
-        }
-
-        if (
-          missile.worldPos.x > worldWidth / 2 ||
-          missile.worldPos.x < -worldWidth / 2 ||
-          missile.worldPos.y > worldHeight / 2 ||
-          missile.worldPos.y < -worldHeight / 2
-        ) {
-          ownBullet.splice(ownBullet.indexOf(missile), 1);
-          //suprimer la bullet de la base de données
-          socketClient.emit(
-            "deleteBullet",
-            JSON.stringify({
-              id: socketClient.id,
-              num: missile.num,
-            })
-          );
-        }
-      });
-
-      // Afficher les bullets des autres joueurs assez proches du joueur
+      // Enlever les missiles des autres joueurs
       otherBullet.forEach((missile) => {
         app.stage.removeChild(missile.sprite);
       });
-      otherBullet = [];
-      otherBulletParsed.forEach((missile) => {
-        let distX = Math.abs(missile.worldPosX - player.worldPos.x);
-        let distY = Math.abs(missile.worldPosY - player.worldPos.y);
 
-        if (distX < app.screen.width / 2 && distY < app.screen.height / 2) {
-          let bullet = Projectile(
-            missile.playerId,
-            missile.num,
-            missile.dX,
-            missile.dY,
-            missile.worldPosX,
-            missile.worldPosY,
-            20,
-            missile.color,
-            missile.dmgValue
-          );
-          bullet.sprite.x =
-            player.sprite.x + bullet.worldPos.x - player.worldPos.x;
-          bullet.sprite.y =
-            player.sprite.y + bullet.worldPos.y - player.worldPos.y;
-          app.stage.addChild(bullet.sprite);
-          otherBullet.push(bullet);
+      // Enlever les missiles du joueur
+      ownBullet.forEach((missile) => {
+        app.stage.removeChild(missile.sprite);
+      });
+
+      // Récupérer les nouvelles bullets affichables
+      let data = bulletUtils.actionBullet(player, worldWidth, worldHeight);
+      ownBullet = data[0];
+      otherBullet = data[1];
+
+      // Afficher les nouvelles bullets
+      ownBullet.forEach((missile) => {
+        if (missile.sprite.x != null && missile.sprite.y != null) {
+          app.stage.addChild(missile.sprite);
         }
+      });
+
+      otherBullet.forEach((missile) => {
+        app.stage.addChild(missile.sprite);
       });
 
       // vérifier si le joueur est touché par un missile
@@ -472,28 +411,11 @@ const PixiComponent = ({ gameData }) => {
         if (distX < 45 && distY < 45) {
           // augmenter les valeurs de comparaison avec distX et distY pour tester la suite (45 = valeurs de base)
           console.log("touché");
-
-          app.stage.removeChild(missile.sprite);
-          otherBullet.splice(otherBullet.indexOf(missile), 1);
-
           player.health -= missile.dmgValue;
-
-          otherBulletParsed.forEach((bullet) => {
-            if (
-              bullet.num === missile.num &&
-              bullet.playerId === missile.playerId
-            ) {
-              otherBulletParsed.splice(otherBulletParsed.indexOf(bullet), 1);
-            }
-          });
-
-          // Dire au serveur d'enlever la bullet
+          console.log(missile);
           socketClient.emit(
-            "deleteContactBullet",
-            JSON.stringify({
-              id: missile.playerId,
-              num: missile.num,
-            })
+            "client:deleteContactBullet",
+            JSON.stringify({ id: missile.playerId, num: missile.num })
           );
 
           // change the health bar
@@ -552,6 +474,8 @@ const PixiComponent = ({ gameData }) => {
         }
       });
     });
+
+    // ---------------------- Fin ----------------------
 
     // Nettoyez l'application PIXI lorsque le composant est démonté
     return () => {
