@@ -180,9 +180,7 @@ io.on("connection", (socket) => {
     redisClient.hdel("bullet", data);
   });
 
-  socket.on("client:deleteContactBullet", (data) => {
-    bulletToAvoid.add(data);
-  });
+  socket.on("client:deleteContactBullet", (data) => {});
 
   // Gérez les événements de websocket ici
 

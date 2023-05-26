@@ -8,6 +8,7 @@ const BulletUtils = ({ socket }) => {
 
   clientSocket.on("server:allBullet", (message) => {
     bulletList.clear();
+    console.log("ping");
     message.forEach((bullet) => {
       bulletList.add(bullet);
     });
@@ -46,7 +47,7 @@ const BulletUtils = ({ socket }) => {
       width,
       height
     );
-
+    console.log("pong");
     return [ownPrintableBullet, otherPrintableBullet];
   };
 

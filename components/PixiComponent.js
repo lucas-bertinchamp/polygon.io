@@ -121,47 +121,6 @@ const PixiComponent = ({ gameData }) => {
         }
       }
     };
-    /*
-    let otherBulletParsed = [];
-    let otherBullet = [];
-    // Créer les projectiles des autres joueurs
-    socketClient.on("allBullet", (data) => {
-      otherBulletParsed = [];
-      // Ne garder que les projectiles des autres joueurs
-      Object.keys(data).forEach((key) => {
-        if (key !== "") {
-          let parsedKey = JSON.parse(key);
-          if (parsedKey.id !== socketClient.id) {
-            let value = JSON.parse(data[parsedKey]);
-            value.playerId = parsedKey.id;
-            otherBulletParsed.push(value);
-          }
-        }
-      });
-      console.log(otherBulletParsed);
-    });
-
-    socketClient.on("deleteContactBullet", (data) => {
-      let parsedData = JSON.parse(data);
-      ownBullet.forEach((bullet) => {
-        if (
-          bullet.num === parsedData.num &&
-          bullet.playerId === parsedData.id
-        ) {
-          app.stage.removeChild(bullet.sprite);
-          ownBullet.splice(ownBullet.indexOf(bullet), 1);
-        }
-      });
-      otherBullet.forEach((bullet) => {
-        if (
-          bullet.num === parsedData.num &&
-          bullet.playerId === parsedData.id
-        ) {
-          app.stage.removeChild(bullet.sprite);
-          otherBullet.splice(otherBullet.indexOf(bullet), 1);
-        }
-      });
-    });*/
 
     let playerList = [];
     //Créer des joueurs
