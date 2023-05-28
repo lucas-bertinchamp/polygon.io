@@ -84,6 +84,7 @@ const PixiComponent = ({ gameData }) => {
 
     // Evenement déclenché si on clique
     window.onclick = (e) => {
+      e.preventDefault();
       // Créer un projectile
       if (player.level > 1) {
         let theta = (2 * Math.PI) / player.level;
@@ -380,6 +381,12 @@ const PixiComponent = ({ gameData }) => {
           console.log("touché");
           player.health -= missile.dmgValue;
 
+          bulletList = bulletList.filter((bullet) => {
+            return (
+              bullet.num !== missile.num && bullet.playerId !== missile.playerId
+            );
+          });
+          
           socketClient.emit(
             "client:deleteBullet",
             JSON.stringify({ id: missile.playerId, num: missile.num })
