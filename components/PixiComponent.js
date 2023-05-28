@@ -383,10 +383,10 @@ const PixiComponent = ({ gameData }) => {
 
           bulletList = bulletList.filter((bullet) => {
             return (
-              bullet.num !== missile.num && bullet.playerId !== missile.playerId
+              bullet.num !== missile.num || bullet.playerId !== missile.playerId
             );
           });
-          
+
           socketClient.emit(
             "client:deleteBullet",
             JSON.stringify({ id: missile.playerId, num: missile.num })
