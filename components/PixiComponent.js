@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
-import XpBubble from "./XpBubble";
-import LifeBubble from "./LifeBubble";
+
 import Player from "./Player";
-import Projectile from "./Projectile";
+
 import Bars from "./Bars";
 import BarsUtils from "./utils/BarsUtils";
 import Leaderboard from "./Leaderboard";
@@ -112,6 +111,7 @@ const PixiComponent = ({ gameData }) => {
             speed: 20,
             color: player.color,
             dmgValue: 5,
+            color: player.color,
           };
 
           let data = JSON.stringify(value);
@@ -121,6 +121,22 @@ const PixiComponent = ({ gameData }) => {
         }
       }
     };
+
+    let printedBullets = [];
+    let bulletList = [];
+    socketClient.on("server:allBullet", (message) => {
+      //Enlever les missiles des autres joueurs
+      bulletList = [];
+      message.forEach((bullet) => {
+        bullet.sprite = PIXI.Sprite.from("/sprites/bullet.png");
+        bullet.sprite.anchor.set(0.5);
+        bullet.sprite.scale.set(0.5);
+        bullet.sprite.x = null;
+        bullet.sprite.y = null;
+        bullet.sprite.tint = bullet.color;
+        bulletList.push(bullet);
+      });
+    });
 
     let playerList = [];
     //Créer des joueurs
@@ -338,6 +354,93 @@ const PixiComponent = ({ gameData }) => {
       // ---------------------- Bullets ----------------------
 
       // Enlever les missiles des autres joueurs
+      printedBullets.forEach((missile) => {
+        app.stage.removeChild(missile.sprite);
+      });
+      printedBullets = [];
+
+      // Actualiser les missiles
+      bulletList.forEach((missile) => {
+        let distX = Math.abs(missile.worldPos.x - player.worldPos.x);
+        let distY = Math.abs(missile.worldPos.y - player.worldPos.y);
+        if (distX < window.innerWidth / 2 && distY < window.innerHeight / 2) {
+          missile.sprite.x =
+            missile.worldPos.x + window.innerWidth / 2 - player.worldPos.x;
+          missile.sprite.y =
+            missile.worldPos.y + window.innerHeight / 2 - player.worldPos.y;
+          printedBullets.push(missile);
+        }
+      });
+
+      // Verifier si le joueur est touché par un missile
+      printedBullets.forEach((missile) => {
+        const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
+        const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
+        if (distX < 30 && distY < 30) {
+          console.log("touché");
+          player.health -= missile.dmgValue;
+
+          socketClient.emit(
+            "client:deleteBullet",
+            JSON.stringify({ id: missile.playerId, num: missile.num })
+          );
+
+          // change the health bar
+          barsUtils.setBarValue(1, player.health);
+
+          // if the player is dead
+          if (player.health <= 0) {
+            app.stage.removeChild(player.sprite);
+            if (player.level === 1) {
+              player = Player(
+                app.screen.width / 2,
+                app.screen.height / 2,
+                Math.floor(Math.random() * worldWidth - worldWidth / 2),
+                Math.floor(Math.random() * worldHeight - worldHeight / 2),
+                1,
+                player.color,
+                healthByLevel[1],
+                0,
+                player.name
+              );
+            } else {
+              player = Player(
+                app.screen.width / 2,
+                app.screen.height / 2,
+                player.worldPos.x,
+                player.worldPos.y,
+                player.level - 1,
+                player.color,
+                healthByLevel[player.level - 1],
+                player.xpTotal - xpNeeded[player.level - 1],
+                player.name
+              );
+            }
+
+            app.stage.addChild(player.sprite);
+            // remettre le text du joueur devant
+            app.stage.addChild(player.playerNameText);
+
+            // on change les max des bars au niveau en dessous
+            barsUtils.setBarMaxValue(1, healthByLevel[player.level]);
+            barsUtils.setBarMaxValue(2, xpNeeded[player.level]);
+            // remettre la barre de vie à 100%
+            barsUtils.setBarValue(1, healthByLevel[player.level]);
+            // remettre la barre d'XP à 0
+            barsUtils.setBarValue(2, 0);
+            // changer le nom de la barre d'XP
+            barsUtils.setBarName(2, "XP " + parseInt(player.level).toString());
+          }
+        }
+      });
+
+      // Afficher les missiles
+      printedBullets.forEach((missile) => {
+        app.stage.addChild(missile.sprite);
+      });
+
+      /*
+      // Enlever les missiles des autres joueurs
       otherBullet.forEach((missile) => {
         app.stage.removeChild(missile.sprite);
       });
@@ -362,6 +465,7 @@ const PixiComponent = ({ gameData }) => {
       otherBullet.forEach((missile) => {
         app.stage.addChild(missile.sprite);
       });
+
 
       // vérifier si le joueur est touché par un missile
       otherBullet.forEach((missile) => {
@@ -431,7 +535,7 @@ const PixiComponent = ({ gameData }) => {
         if (missile.sprite.x !== null && missile.sprite.y !== null) {
           app.stage.addChild(missile.sprite);
         }
-      });
+      });*/
     });
 
     // ---------------------- Fin ----------------------

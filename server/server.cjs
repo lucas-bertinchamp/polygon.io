@@ -1,9 +1,8 @@
 const { createServer } = require("http");
-const { Server } = require("socket.io");
 const socketIo = require("socket.io");
 const { parse } = require("url");
 const next = require("next");
-const express = require("express");
+const PIXI = require("pixi.js");
 
 const { Worker } = require("worker_threads");
 
@@ -12,8 +11,6 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 const Redis = require("ioredis");
-const { send } = require("process");
-const { stringify } = require("querystring");
 
 let sockets = [];
 const port = process.env.PORT || 3000;
@@ -37,10 +34,10 @@ const io = socketIo(httpServer);
 
 let nMessage = 20;
 
-const workerXp = new Worker("./workerXp.js");
-const workerHealth = new Worker("./workerHealth.js");
-const workerPlayer = new Worker("./workerPlayer.js");
-const workerBullet = new Worker("./workerBullet.js");
+const workerXp = new Worker("./server/workerXp.js");
+const workerHealth = new Worker("./server/workerHealth.js");
+const workerPlayer = new Worker("./server/workerPlayer.js");
+const workerBullet = new Worker("./server/workerBullet.js");
 
 workerXp.on("message", (data) => {
   io.emit("server:addXpBubble", data);
@@ -176,11 +173,9 @@ io.on("connection", (socket) => {
     redisClient.hset("bullet", data.key, data.value);
   });
 
-  socket.on("deleteBullet", (data) => {
+  socket.on("client:deleteBullet", (data) => {
     redisClient.hdel("bullet", data);
   });
-
-  socket.on("client:deleteContactBullet", (data) => {});
 
   // Gérez les événements de websocket ici
 

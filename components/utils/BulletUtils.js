@@ -6,20 +6,22 @@ const BulletUtils = ({ socket }) => {
   let ownOnBoardMap = new Map();
   let otherOnBoardMap = new Map();
 
+  /*
   clientSocket.on("server:allBullet", (message) => {
     bulletList.clear();
-    console.log("ping");
     message.forEach((bullet) => {
       bulletList.add(bullet);
     });
   });
+
+
+
 
   const deleteBullet = (bullet) => {
     let stringBullet = JSON.stringify({
       id: bullet.playerId,
       num: bullet.num,
     });
-    console.log("stringBullet : " + stringBullet);
     clientSocket.emit("deleteBullet", stringBullet);
   };
 
@@ -47,7 +49,6 @@ const BulletUtils = ({ socket }) => {
       width,
       height
     );
-    console.log("pong");
     return [ownPrintableBullet, otherPrintableBullet];
   };
 
@@ -136,12 +137,9 @@ const BulletUtils = ({ socket }) => {
     }
     otherOnBoardMap = otherOnBoardMap2;
     return [...otherOnBoardMap.values()];
-  };
+  };*/
 
-  return {
-    actionBullet,
-    deleteBullet,
-  };
+  return {};
 };
 
 export default BulletUtils;

@@ -25,6 +25,7 @@ const Projectile = (
     dmgValue: dmgValue,
     speed_x: dX * speed,
     speed_y: dY * speed,
+    color: color,
   };
 };
 

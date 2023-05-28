@@ -1,15 +1,15 @@
-const Redis = require("ioredis");
+import Redis from "ioredis";
 const redisClient = Redis.createClient(process.env.REDIS_URL);
-const { workerData, parentPort } = require("worker_threads");
+import { workerData, parentPort } from "worker_threads";
 
-let nHealthBubble = 5;
+let nXpBubble = 100;
 
 parentPort.on("message", (msg) => {
-  checkHealthBubble();
+  checkXpBubble();
 });
 
-const checkHealthBubble = () => {
-  redisClient.smembers("healthBubble", (err, data) => {
+const checkXpBubble = () => {
+  redisClient.smembers("xpBubble", (err, data) => {
     if (err) {
       console.error(
         "Erreur lors de la récupération des données depuis Redis",
@@ -17,20 +17,20 @@ const checkHealthBubble = () => {
       );
       return;
     }
-    // Si pas assez de bulles d'ehealthérience, en créer une nouvelle
-    if (data.length < nHealthBubble) {
-      for (let i = 0; i < nHealthBubble - data.length; i++) {
-        let bubble = createHealthBubble();
+    // Si pas assez de bulles d'expérience, en créer une nouvelle
+    if (data.length < nXpBubble) {
+      for (let i = 0; i < nXpBubble - data.length; i++) {
+        let bubble = createXpBubble();
         parentPort.postMessage(bubble);
       }
     }
   });
 };
 
-const createHealthBubble = () => {
+const createXpBubble = () => {
   let randomPosX = Math.floor(Math.random() * 1000 - 500);
   let randomPosY = Math.floor(Math.random() * 1000 - 500);
   let data = JSON.stringify(randomPosX) + ";" + JSON.stringify(randomPosY);
-  redisClient.sadd("healthBubble", data);
+  redisClient.sadd("xpBubble", data);
   return data;
 };

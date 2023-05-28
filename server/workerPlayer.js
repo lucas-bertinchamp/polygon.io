@@ -1,13 +1,13 @@
-const Redis = require("ioredis");
+import { parentPort } from "worker_threads";
+import Redis from "ioredis";
 const redisClient = Redis.createClient(process.env.REDIS_URL);
-const { workerData, parentPort } = require("worker_threads");
 
 parentPort.on("message", (msg) => {
-  sendBullet();
+  sendPlayer();
 });
 
-const sendBullet = () => {
-  redisClient.hgetall("bullet", (err, data) => {
+const sendPlayer = () => {
+  redisClient.hgetall("player", (err, data) => {
     if (err) {
       console.error(
         "Erreur lors de la récupération des données depuis Redis",
@@ -16,9 +16,7 @@ const sendBullet = () => {
       return;
     }
 
-    const values = Object.values(data);
-
     // Envoyer les données aux clients via les connexions WebSocket
-    parentPort.postMessage(values);
+    parentPort.postMessage(data);
   });
 };

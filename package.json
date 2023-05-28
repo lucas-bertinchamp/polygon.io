@@ -1,12 +1,13 @@
 {
   "name": "polygon.io",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "debug": "node --inspect server.js",
+    "dev": "node server/server.cjs",
+    "debug": "node --inspect server/server.cjs",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "NODE_ENV=production node server/server.cjs",
     "lint": "next lint"
   },
   "dependencies": {
