@@ -80,7 +80,7 @@ setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   workerBullet.postMessage({});
   workerPlayer.postMessage({});
-}, 20);
+}, 25);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages

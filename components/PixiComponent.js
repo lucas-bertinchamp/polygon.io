@@ -424,7 +424,7 @@ const PixiComponent = ({ gameData }) => {
         if (missile.playerId !== socketClient.id) {
           const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
           const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
-          if (distX < 30 && distY < 30) {
+          if (distX < 45 && distY < 45) {
             console.log("touché");
             player.health -= missile.dmgValue;
 
