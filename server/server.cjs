@@ -87,7 +87,7 @@ setInterval(() => {
 
 setInterval(() => {
   sendLeaderboard();
-}, 5000);
+}, 1000);
 
 // Gestion des connexions websocket
 io.on("connection", (socket) => {
