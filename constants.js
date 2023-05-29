@@ -1,0 +1,17 @@
+const WIDTH = 5000;
+const HEIGHT = 5000;
+
+const N_XP_BUBBLE = 200;
+const N_HEALTH_BUBBLE = 10;
+
+const BULLET_SPEED = 10;
+const BULLET_DAMAGE = 5;
+
+export default {
+  WIDTH,
+  HEIGHT,
+  N_XP_BUBBLE,
+  N_HEALTH_BUBBLE,
+  BULLET_SPEED,
+  BULLET_DAMAGE,
+};

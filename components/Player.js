@@ -1,6 +1,16 @@
 import * as PIXI from "pixi.js";
 
-const Player = (posX, posY, worldPosX, worldPosY, level, color, health) => {
+const Player = (
+  posX,
+  posY,
+  worldPosX,
+  worldPosY,
+  level,
+  color,
+  health,
+  xpTotal,
+  name
+) => {
   worldPosX = worldPosX;
   worldPosY = worldPosY;
 
@@ -9,13 +19,24 @@ const Player = (posX, posY, worldPosX, worldPosY, level, color, health) => {
   spritePlayer.x = posX;
   spritePlayer.y = posY;
 
+  const playerNameText = new PIXI.Text(name, {
+    fill: 0x000000, // text color
+  });
+
+  playerNameText.anchor.set(0.5); // center the text
+  playerNameText.position.set(spritePlayer.x, spritePlayer.y - 55);
+
   return {
     sprite: spritePlayer,
+    name: name,
     worldPos: { x: worldPosX, y: worldPosY },
     xpValue: 0,
     level: level,
     health: health,
     color: color,
+    xpTotal: xpTotal,
+    ammo: 20,
+    playerNameText: playerNameText,
   };
 };
 

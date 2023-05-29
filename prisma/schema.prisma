@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int   @id @default(autoincrement())
+  name      String?
+  color  String
+  worldPosX Int
+  worldPosY Int
+  level    Int
+  xp       Int
+  hp      Int
+  ammo   Int
+  messages Message[]
+  projectiles Projectile[]
+
+  @@map(name: "User")
+}
+
+model XPBubble {
+  worldPosX Int
+  worldPosY Int
+  xp       Int
+  @@id([worldPosX, worldPosY])
+  @@map(name: "XPBubble")
+}
+
+// An HPBubble is a bubble giving a specific amount of HP to the player. It can be identified by its position in the two axis.
+model HPBubble {
+  worldPosX Int
+  worldPosY Int
+  hp       Int
+  @@id([worldPosX, worldPosY])
+  @@map(name: "HPBubble")
+}
+
+model Projectile {
+  id        Int   @id @default(autoincrement())
+  worldPosX Int
+  worldPosY Int
+  speedX     Int
+  speedY     Int
+  damage    Int
+  sender   User? @relation(fields: [senderId], references: [id])
+  senderId Int?
+  @@map(name: "Projectile")
+}
+
+model Message {
+  id        Int   @id @default(autoincrement())
+  author   User? @relation(fields: [authorId], references: [id])
+  authorId Int?
+  content  String
+  date    DateTime @default(now())
+  @@map(name: "Message")
+}
