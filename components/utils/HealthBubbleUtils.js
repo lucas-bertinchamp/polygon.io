@@ -6,7 +6,6 @@ const HealthBubbleUtils = ({ socket }) => {
   let onBoardMap = new Map();
 
   clientSocket.on("server:deleteHealthBubble", (message) => {
-    console.log("message : " + message);
     healthBubbleList.delete(message);
   });
 
