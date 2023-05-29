@@ -425,6 +425,7 @@ const PixiComponent = ({ gameData }) => {
                 player.color,
                 healthByLevel[player.level - 1],
                 player.xpTotal - xpNeeded[player.level - 1],
+                player.ammo,
                 player.name
               );
             }
