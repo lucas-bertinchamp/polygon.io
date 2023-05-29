@@ -49,7 +49,7 @@ workerHealth.on("message", (data) => {
 });
 
 workerPlayer.on("message", (data) => {
-  io.emit("player", data);
+  io.emit("player", compressData(data));
 });
 
 workerBullet.on("message", (data) => {
@@ -80,7 +80,7 @@ setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   workerBullet.postMessage({});
   workerPlayer.postMessage({});
-}, 17);
+}, 20);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages

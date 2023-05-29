@@ -177,6 +177,7 @@ const PixiComponent = ({ gameData }) => {
     let playerList = [];
     //Créer des joueurs
     socketClient.on("player", (data) => {
+      data = decompressData(data);
       playerList.forEach((otherPlayer) => {
         if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
           app.stage.removeChild(otherPlayer.sprite);
