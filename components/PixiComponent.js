@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
 
+import pako from "pako";
+
 import Player from "./Player";
 
 import Bars from "./Bars";
@@ -124,7 +126,7 @@ const PixiComponent = ({ gameData }) => {
           }
           let dx = Math.cos(theta_0 + theta * i);
           let dy = Math.sin(theta_0 + theta * i);
-          let radius = player.sprite.height;
+          let radius = (1.75 * player.sprite.height) / 2;
 
           let key = JSON.stringify({ id: socketClient.id, num: totalBullets });
 
@@ -150,10 +152,16 @@ const PixiComponent = ({ gameData }) => {
       }
     };
 
+    function decompressData(compressedData) {
+      const inflatedData = pako.inflate(compressedData, { to: "string" });
+      return JSON.parse(inflatedData);
+    }
+
     let printedBullets = [];
     let bulletList = [];
     socketClient.on("server:allBullet", (message) => {
       //Enlever les missiles des autres joueurs
+      message = decompressData(message);
       bulletList = [];
       message.forEach((bullet) => {
         bullet.sprite = PIXI.Sprite.from("/sprites/bullet.png");
@@ -247,7 +255,7 @@ const PixiComponent = ({ gameData }) => {
 
     // ---------------------- Boucle du jeu ----------------------
 
-    app.ticker.maxFPS = 100;
+    app.ticker.maxFPS = 65;
     // Boucle du jeu
     app.ticker.add(() => {
       // Enlève les joueurs de l'écran puis actualise leur position
@@ -412,74 +420,80 @@ const PixiComponent = ({ gameData }) => {
 
       // Verifier si le joueur est touché par un missile
       printedBullets.forEach((missile) => {
-        const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
-        const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
-        if (distX < 30 && distY < 30) {
-          console.log("touché");
-          player.health -= missile.dmgValue;
+        if (missile.playerId !== socketClient.id) {
+          const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
+          const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
+          if (distX < 30 && distY < 30) {
+            console.log("touché");
+            player.health -= missile.dmgValue;
 
-          bulletList = bulletList.filter((bullet) => {
-            return (
-              bullet.num !== missile.num || bullet.playerId !== missile.playerId
+            bulletList = bulletList.filter((bullet) => {
+              return (
+                bullet.num !== missile.num ||
+                bullet.playerId !== missile.playerId
+              );
+            });
+
+            socketClient.emit(
+              "client:deleteBullet",
+              JSON.stringify({ id: missile.playerId, num: missile.num })
             );
-          });
 
-          socketClient.emit(
-            "client:deleteBullet",
-            JSON.stringify({ id: missile.playerId, num: missile.num })
-          );
+            // change the health bar
+            barsUtils.setBarValue(1, player.health);
 
-          // change the health bar
-          barsUtils.setBarValue(1, player.health);
+            // if the player is dead
+            if (player.health <= 0) {
+              app.stage.removeChild(player.sprite);
+              if (player.level === 1) {
+                player = Player(
+                  app.screen.width / 2,
+                  app.screen.height / 2,
+                  Math.floor(
+                    Math.random() * CONSTANTS.WIDTH - CONSTANTS.WIDTH / 2
+                  ),
+                  Math.floor(
+                    Math.random() * CONSTANTS.HEIGHT - CONSTANTS.HEIGHT / 2
+                  ),
+                  1,
+                  player.color,
+                  healthByLevel[1],
+                  0,
+                  player.name
+                );
+              } else {
+                let previousAmmo = player.ammo;
+                player = Player(
+                  app.screen.width / 2,
+                  app.screen.height / 2,
+                  player.worldPos.x,
+                  player.worldPos.y,
+                  player.level - 1,
+                  player.color,
+                  healthByLevel[player.level - 1],
+                  player.xpTotal - xpNeeded[player.level - 1] - player.xpValue,
+                  player.name
+                );
+                player.ammo = previousAmmo;
+              }
 
-          // if the player is dead
-          if (player.health <= 0) {
-            app.stage.removeChild(player.sprite);
-            if (player.level === 1) {
-              player = Player(
-                app.screen.width / 2,
-                app.screen.height / 2,
-                Math.floor(
-                  Math.random() * CONSTANTS.WIDTH - CONSTANTS.WIDTH / 2
-                ),
-                Math.floor(
-                  Math.random() * CONSTANTS.HEIGHT - CONSTANTS.HEIGHT / 2
-                ),
-                1,
-                player.color,
-                healthByLevel[1],
-                0,
-                player.name
+              app.stage.addChild(player.sprite);
+              // remettre le text du joueur devant
+              app.stage.addChild(player.playerNameText);
+
+              // on change les max des bars au niveau en dessous
+              barsUtils.setBarMaxValue(1, healthByLevel[player.level]);
+              barsUtils.setBarMaxValue(2, xpNeeded[player.level]);
+              // remettre la barre de vie à 100%
+              barsUtils.setBarValue(1, healthByLevel[player.level]);
+              // remettre la barre d'XP à 0
+              barsUtils.setBarValue(2, 0);
+              // changer le nom de la barre d'XP
+              barsUtils.setBarName(
+                2,
+                "XP " + parseInt(player.level).toString()
               );
-            } else {
-              let previousAmmo = player.ammo;
-              player = Player(
-                app.screen.width / 2,
-                app.screen.height / 2,
-                player.worldPos.x,
-                player.worldPos.y,
-                player.level - 1,
-                player.color,
-                healthByLevel[player.level - 1],
-                player.xpTotal - xpNeeded[player.level - 1] - player.xpValue,
-                player.name
-              );
-              player.ammo = previousAmmo;
             }
-
-            app.stage.addChild(player.sprite);
-            // remettre le text du joueur devant
-            app.stage.addChild(player.playerNameText);
-
-            // on change les max des bars au niveau en dessous
-            barsUtils.setBarMaxValue(1, healthByLevel[player.level]);
-            barsUtils.setBarMaxValue(2, xpNeeded[player.level]);
-            // remettre la barre de vie à 100%
-            barsUtils.setBarValue(1, healthByLevel[player.level]);
-            // remettre la barre d'XP à 0
-            barsUtils.setBarValue(2, 0);
-            // changer le nom de la barre d'XP
-            barsUtils.setBarName(2, "XP " + parseInt(player.level).toString());
           }
         }
       });

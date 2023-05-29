@@ -3,6 +3,7 @@ const socketIo = require("socket.io");
 const { parse } = require("url");
 const next = require("next");
 const PIXI = require("pixi.js");
+const pako = require("pako");
 
 const { Worker } = require("worker_threads");
 
@@ -52,7 +53,7 @@ workerPlayer.on("message", (data) => {
 });
 
 workerBullet.on("message", (data) => {
-  io.emit("server:allBullet", data);
+  io.emit("server:allBullet", compressData(data));
 });
 
 // Connexion à la base de données Redis
@@ -79,7 +80,7 @@ setInterval(() => {
   // Effectuer l'appel à la base de données pour récupérer les données mises à jour
   workerBullet.postMessage({});
   workerPlayer.postMessage({});
-}, 25);
+}, 17);
 
 setInterval(() => {
   // Effectuer l'appel à la base de données pour envoyer les messages
@@ -256,3 +257,8 @@ const sendLeaderboard = () => {
     io.sockets.emit("leaderboard", values);
   });
 };
+
+function compressData(data) {
+  const compressedData = pako.deflate(JSON.stringify(data));
+  return compressedData;
+}

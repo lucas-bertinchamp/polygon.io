@@ -1,4 +1,5 @@
 import XpBubble from "../XpBubble";
+import pako from "pako";
 
 const XpBubbleUtils = ({ socket }) => {
   let clientSocket = socket;
