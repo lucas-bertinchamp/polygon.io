@@ -29,7 +29,7 @@ const PixiComponent = ({ gameData }) => {
   // Minimap data
   const [player, setPlayer] = useState();
 
-  const [objects, setObjects] = useState();
+  const [objects, setObjects] = useState([]);
 
   const updateMinimap = (newPlayer, newObjects) => {
     setPlayer((prevData) => (newPlayer ? newPlayer : prevData));
@@ -49,7 +49,7 @@ const PixiComponent = ({ gameData }) => {
     const app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
-      transparent: true, // couleur de fond
+      backgroundColor: 0x000000, // couleur de fond
     });
     const pixiContainer = pixiContainerRef.current;
     pixiContainer.appendChild(app.view);
@@ -216,7 +216,7 @@ const PixiComponent = ({ gameData }) => {
       ) {
         player.worldPos.x =
           player.worldPos.x + cursorX * CONSTANTS.PLAYER_SPEED;
-        background.tilePosition.x -= cursorX * speed;
+        background.tilePosition.x -= cursorX * CONSTANTS.PLAYER_SPEED;
       }
       if (
         player.worldPos.y + cursorY * CONSTANTS.PLAYER_SPEED <
@@ -226,7 +226,7 @@ const PixiComponent = ({ gameData }) => {
       ) {
         player.worldPos.y =
           player.worldPos.y + cursorY * CONSTANTS.PLAYER_SPEED;
-        background.tilePosition.y -= cursorY * speed;
+        background.tilePosition.y -= cursorY * CONSTANTS.PLAYER_SPEED;
       }
 
       //Envoie la postion du joueur au serveur
@@ -498,7 +498,6 @@ const PixiComponent = ({ gameData }) => {
       }));
 
       let posPlayer = playerList.map((otherPlayer, indice) => {
-        console.log(otherPlayer.color);
         return {
           id: indice,
           position: {
@@ -514,7 +513,6 @@ const PixiComponent = ({ gameData }) => {
           },
         };
       });
-
       setObjects(posPlayer);
     });
 
