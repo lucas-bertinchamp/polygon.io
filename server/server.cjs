@@ -62,6 +62,7 @@ redisClient.del("bullet");
 redisClient.del("xpBubble");
 redisClient.del("healthBubble");
 redisClient.sadd("xpBubble", "0;0");
+redisClient.del("message");
 
 setInterval(() => {
   // Supprimer la base de données de joueur
