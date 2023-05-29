@@ -3,6 +3,7 @@ const socketIo = require("socket.io");
 const { parse } = require("url");
 const next = require("next");
 const PIXI = require("pixi.js");
+const pako = require("pako");
 
 const { Worker } = require("worker_threads");
 
@@ -48,11 +49,11 @@ workerHealth.on("message", (data) => {
 });
 
 workerPlayer.on("message", (data) => {
-  io.emit("player", data);
+  io.emit("player", compressData(data));
 });
 
 workerBullet.on("message", (data) => {
-  io.emit("server:allBullet", data);
+  io.emit("server:allBullet", compressData(data));
 });
 
 // Connexion à la base de données Redis
@@ -62,6 +63,7 @@ redisClient.del("bullet");
 redisClient.del("xpBubble");
 redisClient.del("healthBubble");
 redisClient.sadd("xpBubble", "0;0");
+redisClient.del("message");
 
 setInterval(() => {
   // Supprimer la base de données de joueur
@@ -102,7 +104,7 @@ io.on("connection", (socket) => {
       if (err) {
         console.log(err);
       } else {
-        socket.emit("server:initialXpBubble", res);
+        socket.emit("server:initialXpBubble", compressData(res));
       }
     });
   });
@@ -152,21 +154,22 @@ io.on("connection", (socket) => {
 
   socket.on("message", (message) => {
     //Récupérer le nom du joueur
-    redisClient.hget("player", JSON.stringify(socket.id), (err, data) => {
-      if (err) {
-        console.error(
-          "Erreur lors de la récupération des données depuis Redis",
-          err
-        );
-        return;
-      }
-      let playerData = JSON.parse(data);
-      let playerName = playerData.name;
-      console.log(playerData);
-      message = playerName + " : " + message;
-      // Enregistrer le message dans la base de données Redis
-      redisClient.lpush("message", message);
-    });
+    if (message.message !== "") {
+      redisClient.hget("player", JSON.stringify(socket.id), (err, data) => {
+        if (err) {
+          console.error(
+            "Erreur lors de la récupération des données depuis Redis",
+            err
+          );
+          return;
+        }
+        let playerData = JSON.parse(data);
+        let playerName = playerData.name;
+        message.message = playerName + " : " + message.message;
+        // Enregistrer le message dans la base de données Redis
+        redisClient.lpush("message", JSON.stringify(message));
+      });
+    }
   });
 
   socket.on("addBullet", (data) => {
@@ -221,6 +224,14 @@ const sendMessages = () => {
       return;
     }
 
+    // Supprimer les vieux messages
+    data.forEach((message) => {
+      message = JSON.parse(message);
+      if (message.time < Date.now() - 1000 * 60) {
+        redisClient.lrem("message", 1, JSON.stringify(message));
+      }
+    });
+
     // Envoyer les données aux clients via les connexions WebSocket
     io.sockets.emit("messageList", data);
   });
@@ -246,3 +257,8 @@ const sendLeaderboard = () => {
     io.sockets.emit("leaderboard", values);
   });
 };
+
+function compressData(data) {
+  const compressedData = pako.deflate(JSON.stringify(data));
+  return compressedData;
+}

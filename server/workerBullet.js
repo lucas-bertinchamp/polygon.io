@@ -54,6 +54,15 @@ const sendBullet = () => {
           "bullet",
           JSON.stringify({ id: valueParsed.playerId, num: valueParsed.num })
         );
+      } else if (
+        (valueParsed.spawnPoint.x - valueParsed.worldPosX) ** 2 +
+          (valueParsed.spawnPoint.y - valueParsed.worldPosY) ** 2 >
+        CONSTANTS.BULLET_DISTANCE ** 2
+      ) {
+        redisClient.hdel(
+          "bullet",
+          JSON.stringify({ id: valueParsed.playerId, num: valueParsed.num })
+        );
       } else {
         redisClient.hset(
           "bullet",

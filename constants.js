@@ -1,11 +1,14 @@
 const WIDTH = 5000;
 const HEIGHT = 5000;
 
-const N_XP_BUBBLE = 300;
+const N_XP_BUBBLE = (WIDTH + HEIGHT) / 20;
 const N_HEALTH_BUBBLE = 15;
 
 const BULLET_SPEED = 15;
 const BULLET_DAMAGE = 5;
+const BULLET_DISTANCE = 1750;
+
+const PLAYER_SPEED = 10;
 
 export default {
   WIDTH,
@@ -14,4 +17,6 @@ export default {
   N_HEALTH_BUBBLE,
   BULLET_SPEED,
   BULLET_DAMAGE,
+  BULLET_DISTANCE,
+  PLAYER_SPEED,
 };

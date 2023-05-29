@@ -9,33 +9,19 @@ const Chat = ({ socket }) => {
 
   // Ecouter les messages du serveur
   socket.on("messageList", (message) => {
-    setMessages((prevMessages) => [...message].reverse());
-  });
-
-  /*
-  useEffect(() => {
-    // Masquer chaque message du chat après 10 secondes
-    messages.forEach((message, index) => {
-      const timeout = setTimeout(() => {
-        setMessages((prevMessages) => {
-          const updatedMessages = [...prevMessages];
-          updatedMessages.splice(index, 1); // Supprimer le message à l'index spécifié
-          return updatedMessages;
-        });
-      }, 10000);
-
-      // Nettoyer le timeout lorsque le composant est démonté ou lorsque le message est supprimé manuellement
-      return () => clearTimeout(timeout);
+    let messages = message.map((message) => {
+      return JSON.parse(message).message;
     });
-  }, [messages]);
-*/
+    setMessages((prevMessages) => [...messages].reverse());
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const message = e.target.message.value;
+    const time = Date.now();
 
     // Envoyer le message au serveur
-    socket.emit("message", message);
+    socket.emit("message", { message: message, time: time });
 
     e.target.message.value = "";
   };
@@ -48,7 +34,7 @@ const Chat = ({ socket }) => {
         ))}
       </div>
       <form onSubmit={handleSubmit}>
-        <input type="text" name="message" />
+        <input type="text" name="message" id="chat" />
       </form>
     </div>
   );
