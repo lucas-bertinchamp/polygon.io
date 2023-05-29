@@ -10,6 +10,7 @@ import { io } from "socket.io-client";
 import Chat from "./Chat";
 import XpBubbleUtils from "./utils/XpBubbleUtils";
 import HealthBubbleUtils from "./utils/HealthBubbleUtils";
+import Minimap from "./Minimap";
 
 import CONSTANTS from "../constants.js";
 
@@ -25,23 +26,18 @@ const PixiComponent = ({ gameData }) => {
   let dataPlayerColor = gameData.playerColor;
   let playerColorCoded = dataPlayerColor.replace("#", "0x");
 
-  // Leaderboard data (for testing, it should be fetched from the API)
-  let testLeaderboardData = [
-    { id: 1, playerName: "Elie", score: 10000, color: "red" },
-    { id: 2, playerName: "John", score: 80, color: "blue" },
-    { id: 3, playerName: "Laulau2", score: 120, color: "green" },
-    { id: 4, playerName: dataPlayerName, score: 0, color: playerColorCoded },
-    { id: 5, playerName: "Laulau1", score: 666, color: "yellow" },
-    { id: 6, playerName: "Laulau4", score: 777, color: "purple" },
-    { id: 7, playerName: "Laulau3", score: -4 },
-    { id: 8, playerName: "Laulau5", score: 1 },
-    { id: 9, playerName: "Laulau6", score: 30 },
-    { id: 10, playerName: "Laulau7".slice(0, 13), score: 420 },
-    { id: 11, playerName: "DoitPasEtreAffiche".slice(0, 13), score: -420 },
-  ];
+  // Minimap data
+  const [player, setPlayer] = useState();
+
+  const [objects, setObjects] = useState();
+
+  const updateMinimap = (newPlayer, newObjects) => {
+    setPlayer((prevData) => (newPlayer ? newPlayer : prevData));
+    setObjects((prevData) => (newObjects ? newObjects : prevData));
+  };
 
   const pixiContainerRef = useRef(null);
-  const xpNeeded = [0, 10, 20, 40, 80, 160, 100000]; // 0 to start at index 1 for level 1
+  const xpNeeded = [0, 20, 40, 80, 160, 320, 200000]; // 0 to start at index 1 for level 1
   const healthByLevel = [0, 100, 120, 140, 160, 180, 200]; // 0 to start at index 1 for level 1
 
   let totalBullets = 0;
@@ -57,6 +53,9 @@ const PixiComponent = ({ gameData }) => {
     });
     const pixiContainer = pixiContainerRef.current;
     pixiContainer.appendChild(app.view);
+
+    const background = PIXI.Sprite.from("/just_background.png");
+    app.stage.addChild(background);
 
     // Création du joueur
     let player = Player(
@@ -86,11 +85,27 @@ const PixiComponent = ({ gameData }) => {
       mousePos.x = e.clientX;
       mousePos.y = e.clientY;
     };
-
+    /*
     // Evenement déclenché si on clique
+    window.onkeydown = (e) => {
+      e.preventDefault();
+      console.log(document.activeElement.id === "chat");
+      // Vérifie que l'on est pas dans le chat
+      if (document.activeElement.id !== "chat") {
+        if (e.code === "Space") {
+          creerProjectile();
+        }
+      } else {
+        return;
+      }
+    };*/
+
     window.onclick = (e) => {
       e.preventDefault();
-      // Créer un projectile
+      creerProjectile();
+    };
+
+    const creerProjectile = (dx, dy) => {
       if (player.level > 1 && player.ammo > 5) {
         let theta = (2 * Math.PI) / player.level;
         for (let i = 0; i < player.level; i++) {
@@ -115,6 +130,7 @@ const PixiComponent = ({ gameData }) => {
             dx: dx,
             dy: dy,
             color: player.color,
+            spawnPoint: { x: player.worldPos.x, y: player.worldPos.y },
           };
 
           let data = JSON.stringify(value);
@@ -183,22 +199,26 @@ const PixiComponent = ({ gameData }) => {
     app.ticker.maxFPS = 100;
     // Boucle du jeu
     app.ticker.add(() => {
-      const speed = 15;
-
       //Actualise la position du joueur dans le monde
       const cursorX = (mousePos.x - app.screen.width / 2) / app.screen.width;
       const cursorY = (mousePos.y - app.screen.height / 2) / app.screen.height;
       if (
-        player.worldPos.x + cursorX * speed < CONSTANTS.WIDTH / 2 &&
-        player.worldPos.x + cursorX * speed > -CONSTANTS.WIDTH / 2
+        player.worldPos.x + cursorX * CONSTANTS.PLAYER_SPEED <
+          CONSTANTS.WIDTH / 2 &&
+        player.worldPos.x + cursorX * CONSTANTS.PLAYER_SPEED >
+          -CONSTANTS.WIDTH / 2
       ) {
-        player.worldPos.x = player.worldPos.x + cursorX * speed;
+        player.worldPos.x =
+          player.worldPos.x + cursorX * CONSTANTS.PLAYER_SPEED;
       }
       if (
-        player.worldPos.y + cursorY * speed < CONSTANTS.HEIGHT / 2 &&
-        player.worldPos.y + cursorY * speed > -CONSTANTS.HEIGHT / 2
+        player.worldPos.y + cursorY * CONSTANTS.PLAYER_SPEED <
+          CONSTANTS.HEIGHT / 2 &&
+        player.worldPos.y + cursorY * CONSTANTS.PLAYER_SPEED >
+          -CONSTANTS.HEIGHT / 2
       ) {
-        player.worldPos.y = player.worldPos.y + cursorY * speed;
+        player.worldPos.y =
+          player.worldPos.y + cursorY * CONSTANTS.PLAYER_SPEED;
       }
 
       //Envoie la postion du joueur au serveur
@@ -315,10 +335,11 @@ const PixiComponent = ({ gameData }) => {
         }
       });
 
-      // ---------------------- Autres ----------------------
+      // ---------------------- Évolution ----------------------
 
       //Vérifie si le joueur peut évoluer
       if (player.xpValue >= xpNeeded[player.level]) {
+        let previousAmmo = player.ammo;
         app.stage.removeChild(player.sprite);
         player = Player(
           app.screen.width / 2,
@@ -331,6 +352,7 @@ const PixiComponent = ({ gameData }) => {
           player.xpTotal,
           player.name
         );
+        player.ammo = previousAmmo;
         if (player.level >= 1) {
           player.health +=
             healthByLevel[player.level] - healthByLevel[player.level - 1];
@@ -416,6 +438,7 @@ const PixiComponent = ({ gameData }) => {
                 player.name
               );
             } else {
+              let previousAmmo = player.ammo;
               player = Player(
                 app.screen.width / 2,
                 app.screen.height / 2,
@@ -424,10 +447,10 @@ const PixiComponent = ({ gameData }) => {
                 player.level - 1,
                 player.color,
                 healthByLevel[player.level - 1],
-                player.xpTotal - xpNeeded[player.level - 1],
-                player.ammo,
+                player.xpTotal - xpNeeded[player.level - 1] - player.xpValue,
                 player.name
               );
+              player.ammo = previousAmmo;
             }
 
             app.stage.addChild(player.sprite);
@@ -451,6 +474,40 @@ const PixiComponent = ({ gameData }) => {
       printedBullets.forEach((missile) => {
         app.stage.addChild(missile.sprite);
       });
+
+      // ---------------------- Minimap ----------------------
+
+      // update the minimap
+      setPlayer((prevData) => ({
+        top:
+          (100 * (player.worldPos.y + CONSTANTS.HEIGHT / 2)) /
+            CONSTANTS.HEIGHT +
+          "%",
+        left:
+          (100 * (player.worldPos.x + CONSTANTS.WIDTH / 2)) / CONSTANTS.WIDTH +
+          "%",
+        backgroundColor: playerColorCoded.replace("0x", "#"),
+      }));
+
+      let posPlayer = playerList.map((otherPlayer, indice) => {
+        console.log(otherPlayer.color);
+        return {
+          id: indice,
+          position: {
+            top:
+              (100 * (otherPlayer.worldPos.y + CONSTANTS.HEIGHT / 2)) /
+                CONSTANTS.HEIGHT +
+              "%",
+            left:
+              (100 * (otherPlayer.worldPos.x + CONSTANTS.WIDTH / 2)) /
+                CONSTANTS.WIDTH +
+              "%",
+            backgroundColor: otherPlayer.color.replace("0x", "#"),
+          },
+        };
+      });
+
+      setObjects(posPlayer);
     });
 
     // ---------------------- Fin ----------------------
@@ -468,6 +525,7 @@ const PixiComponent = ({ gameData }) => {
       <Chat socket={socketClient} />
       <Bars barsData={barsUtils.barsData} />
       <Leaderboard socket={socketClient} />
+      <Minimap player={player} objects={objects} />
     </div>
   );
 };

@@ -152,21 +152,22 @@ io.on("connection", (socket) => {
 
   socket.on("message", (message) => {
     //Récupérer le nom du joueur
-    redisClient.hget("player", JSON.stringify(socket.id), (err, data) => {
-      if (err) {
-        console.error(
-          "Erreur lors de la récupération des données depuis Redis",
-          err
-        );
-        return;
-      }
-      let playerData = JSON.parse(data);
-      let playerName = playerData.name;
-      console.log(playerData);
-      message = playerName + " : " + message;
-      // Enregistrer le message dans la base de données Redis
-      redisClient.lpush("message", message);
-    });
+    if (message.message !== "") {
+      redisClient.hget("player", JSON.stringify(socket.id), (err, data) => {
+        if (err) {
+          console.error(
+            "Erreur lors de la récupération des données depuis Redis",
+            err
+          );
+          return;
+        }
+        let playerData = JSON.parse(data);
+        let playerName = playerData.name;
+        message.message = playerName + " : " + message.message;
+        // Enregistrer le message dans la base de données Redis
+        redisClient.lpush("message", JSON.stringify(message));
+      });
+    }
   });
 
   socket.on("addBullet", (data) => {
@@ -220,6 +221,14 @@ const sendMessages = () => {
       );
       return;
     }
+
+    // Supprimer les vieux messages
+    data.forEach((message) => {
+      message = JSON.parse(message);
+      if (message.time < Date.now() - 1000 * 60) {
+        redisClient.lrem("message", 1, JSON.stringify(message));
+      }
+    });
 
     // Envoyer les données aux clients via les connexions WebSocket
     io.sockets.emit("messageList", data);
