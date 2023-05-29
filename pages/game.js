@@ -59,7 +59,6 @@ function Game() {
           rel="stylesheet"
         />
       </Head>
-
       <PixiComponent gameData={gameData} />
       <Minimap player={player} objects={objects} />
     </div>

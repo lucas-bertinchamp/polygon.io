@@ -10,7 +10,8 @@ import { io } from "socket.io-client";
 import Chat from "./Chat";
 import XpBubbleUtils from "./utils/XpBubbleUtils";
 import HealthBubbleUtils from "./utils/HealthBubbleUtils";
-import BulletUtils from "./utils/BulletUtils";
+
+import CONSTANTS from "../constants.js";
 
 const socketClient = io();
 
@@ -19,7 +20,6 @@ const PixiComponent = ({ gameData }) => {
   let barsUtils = BarsUtils();
   let xpBubbleUtils = XpBubbleUtils({ socket: socketClient });
   let healthBubbleUtils = HealthBubbleUtils({ socket: socketClient });
-  let bulletUtils = BulletUtils({ socket: socketClient });
 
   let dataPlayerName = gameData.playerName;
   let dataPlayerColor = gameData.playerColor;
@@ -39,9 +39,6 @@ const PixiComponent = ({ gameData }) => {
     { id: 10, playerName: "Laulau7".slice(0, 13), score: 420 },
     { id: 11, playerName: "DoitPasEtreAffiche".slice(0, 13), score: -420 },
   ];
-
-  const worldWidth = 1000;
-  const worldHeight = 1000;
 
   const pixiContainerRef = useRef(null);
   const xpNeeded = [0, 10, 20, 40, 80, 160, 100000]; // 0 to start at index 1 for level 1
@@ -65,8 +62,8 @@ const PixiComponent = ({ gameData }) => {
     let player = Player(
       app.screen.width / 2,
       app.screen.height / 2,
-      Math.floor(Math.random() * worldWidth - worldWidth / 2),
-      Math.floor(Math.random() * worldHeight - worldHeight / 2),
+      Math.floor(Math.random() * CONSTANTS.WIDTH - CONSTANTS.WIDTH / 2),
+      Math.floor(Math.random() * CONSTANTS.HEIGHT - CONSTANTS.HEIGHT / 2),
       1,
       playerColorCoded,
       healthByLevel[1],
@@ -75,6 +72,14 @@ const PixiComponent = ({ gameData }) => {
     );
     app.stage.addChild(player.sprite);
     app.stage.addChild(player.playerNameText);
+
+    setInterval(() => {
+      // Regagne une balle
+      if (player.level > 1 && player.ammo < 100) {
+        player.ammo += 0.5;
+        barsUtils.setBarValue(3, player.ammo);
+      }
+    }, 100);
 
     // Evenement déclenché si la position de la souris change
     window.onmousemove = (e) => {
@@ -86,7 +91,7 @@ const PixiComponent = ({ gameData }) => {
     window.onclick = (e) => {
       e.preventDefault();
       // Créer un projectile
-      if (player.level > 1) {
+      if (player.level > 1 && player.ammo > 5) {
         let theta = (2 * Math.PI) / player.level;
         for (let i = 0; i < player.level; i++) {
           let theta_0 = -Math.PI / 2;
@@ -109,9 +114,6 @@ const PixiComponent = ({ gameData }) => {
             worldPosY: player.worldPos.y + radius * dy,
             dx: dx,
             dy: dy,
-            speed: 20,
-            color: player.color,
-            dmgValue: 5,
             color: player.color,
           };
 
@@ -120,6 +122,9 @@ const PixiComponent = ({ gameData }) => {
           socketClient.emit("addBullet", { key: key, value: data });
           totalBullets++;
         }
+        // Enlever une balle au joueur
+        player.ammo -= 5;
+        barsUtils.setBarValue(3, player.ammo);
       }
     };
 
@@ -175,10 +180,6 @@ const PixiComponent = ({ gameData }) => {
     let healthBubbleList = [];
     healthBubbleUtils.initialization();
 
-    // Initialiser les bullets des autres joueurs
-    let otherBullet = [];
-    let ownBullet = [];
-
     app.ticker.maxFPS = 100;
     // Boucle du jeu
     app.ticker.add(() => {
@@ -188,14 +189,14 @@ const PixiComponent = ({ gameData }) => {
       const cursorX = (mousePos.x - app.screen.width / 2) / app.screen.width;
       const cursorY = (mousePos.y - app.screen.height / 2) / app.screen.height;
       if (
-        player.worldPos.x + cursorX * speed < worldWidth / 2 &&
-        player.worldPos.x + cursorX * speed > -worldWidth / 2
+        player.worldPos.x + cursorX * speed < CONSTANTS.WIDTH / 2 &&
+        player.worldPos.x + cursorX * speed > -CONSTANTS.WIDTH / 2
       ) {
         player.worldPos.x = player.worldPos.x + cursorX * speed;
       }
       if (
-        player.worldPos.y + cursorY * speed < worldHeight / 2 &&
-        player.worldPos.y + cursorY * speed > -worldHeight / 2
+        player.worldPos.y + cursorY * speed < CONSTANTS.HEIGHT / 2 &&
+        player.worldPos.y + cursorY * speed > -CONSTANTS.HEIGHT / 2
       ) {
         player.worldPos.y = player.worldPos.y + cursorY * speed;
       }
@@ -402,8 +403,12 @@ const PixiComponent = ({ gameData }) => {
               player = Player(
                 app.screen.width / 2,
                 app.screen.height / 2,
-                Math.floor(Math.random() * worldWidth - worldWidth / 2),
-                Math.floor(Math.random() * worldHeight - worldHeight / 2),
+                Math.floor(
+                  Math.random() * CONSTANTS.WIDTH - CONSTANTS.WIDTH / 2
+                ),
+                Math.floor(
+                  Math.random() * CONSTANTS.HEIGHT - CONSTANTS.HEIGHT / 2
+                ),
                 1,
                 player.color,
                 healthByLevel[1],
@@ -445,104 +450,6 @@ const PixiComponent = ({ gameData }) => {
       printedBullets.forEach((missile) => {
         app.stage.addChild(missile.sprite);
       });
-
-      /*
-      // Enlever les missiles des autres joueurs
-      otherBullet.forEach((missile) => {
-        app.stage.removeChild(missile.sprite);
-      });
-
-      // Enlever les missiles du joueur
-      ownBullet.forEach((missile) => {
-        app.stage.removeChild(missile.sprite);
-      });
-
-      // Récupérer les nouvelles bullets affichables
-      let data = bulletUtils.actionBullet(player, worldWidth, worldHeight);
-      ownBullet = data[0];
-      otherBullet = data[1];
-
-      // Afficher les nouvelles bullets
-      ownBullet.forEach((missile) => {
-        if (missile.sprite.x != null && missile.sprite.y != null) {
-          app.stage.addChild(missile.sprite);
-        }
-      });
-
-      otherBullet.forEach((missile) => {
-        app.stage.addChild(missile.sprite);
-      });
-
-
-      // vérifier si le joueur est touché par un missile
-      otherBullet.forEach((missile) => {
-        const distX = Math.abs(missile.worldPos.x - player.worldPos.x);
-        const distY = Math.abs(missile.worldPos.y - player.worldPos.y);
-        if (distX < 45 && distY < 45) {
-          // augmenter les valeurs de comparaison avec distX et distY pour tester la suite (45 = valeurs de base)
-          console.log("touché");
-          player.health -= missile.dmgValue;
-          console.log(missile);
-          socketClient.emit(
-            "client:deleteContactBullet",
-            JSON.stringify({ id: missile.playerId, num: missile.num })
-          );
-
-          // change the health bar
-          barsUtils.setBarValue(1, player.health);
-
-          // if the player is dead
-          if (player.health <= 0) {
-            app.stage.removeChild(player.sprite);
-            if (player.level === 1) {
-              player = Player(
-                app.screen.width / 2,
-                app.screen.height / 2,
-                Math.floor(Math.random() * worldWidth - worldWidth / 2),
-                Math.floor(Math.random() * worldHeight - worldHeight / 2),
-                1,
-                player.color,
-                healthByLevel[1],
-                0,
-                player.name
-              );
-            } else {
-              player = Player(
-                app.screen.width / 2,
-                app.screen.height / 2,
-                player.worldPos.x,
-                player.worldPos.y,
-                player.level - 1,
-                player.color,
-                healthByLevel[player.level - 1],
-                player.xpTotal - xpNeeded[player.level - 1],
-                player.name
-              );
-            }
-
-            app.stage.addChild(player.sprite);
-            // remettre le text du joueur devant
-            app.stage.addChild(player.playerNameText);
-
-            // on change les max des bars au niveau en dessous
-            barsUtils.setBarMaxValue(1, healthByLevel[player.level]);
-            barsUtils.setBarMaxValue(2, xpNeeded[player.level]);
-            // remettre la barre de vie à 100%
-            barsUtils.setBarValue(1, healthByLevel[player.level]);
-            // remettre la barre d'XP à 0
-            barsUtils.setBarValue(2, 0);
-            // changer le nom de la barre d'XP
-            barsUtils.setBarName(2, "XP " + parseInt(player.level).toString());
-          }
-        }
-      });
-
-      // Remettre les missiles assez proches du joueur
-      ownBullet.forEach((missile) => {
-        if (missile.sprite.x !== null && missile.sprite.y !== null) {
-          app.stage.addChild(missile.sprite);
-        }
-      });*/
     });
 
     // ---------------------- Fin ----------------------

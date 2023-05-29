@@ -35,6 +35,7 @@ const Player = (
     health: health,
     color: color,
     xpTotal: xpTotal,
+    ammo: 20,
     playerNameText: playerNameText,
   };
 };

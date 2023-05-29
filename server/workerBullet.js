@@ -1,11 +1,10 @@
 import Redis from "ioredis";
 const redisClient = Redis.createClient(process.env.REDIS_URL);
+import CONSTANTS from "../constants.js";
 
 import { workerData, parentPort } from "worker_threads";
 
-let bulletSpeed = 10;
-let width = 1000;
-let height = 1000;
+console.log(CONSTANTS.BULLET_SPEED);
 
 parentPort.on("message", (msg) => {
   sendBullet();
@@ -33,8 +32,8 @@ const sendBullet = () => {
         valueParsed.dy,
         valueParsed.worldPosX,
         valueParsed.worldPosY,
-        bulletSpeed,
-        valueParsed.dmgValue,
+        CONSTANTS.BULLET_SPEED,
+        CONSTANTS.BULLET_DAMAGE,
         valueParsed.color
       );
       return bullet;
@@ -43,13 +42,13 @@ const sendBullet = () => {
     // Faire avancer les balles
     values.forEach((value) => {
       let valueParsed = JSON.parse(value);
-      valueParsed.worldPosX += bulletSpeed * valueParsed.dx;
-      valueParsed.worldPosY += bulletSpeed * valueParsed.dy;
+      valueParsed.worldPosX += CONSTANTS.BULLET_SPEED * valueParsed.dx;
+      valueParsed.worldPosY += CONSTANTS.BULLET_SPEED * valueParsed.dy;
       if (
-        valueParsed.worldPosX < -width / 2 ||
-        valueParsed.worldPosX > width / 2 ||
-        valueParsed.worldPosY < -height / 2 ||
-        valueParsed.worldPosY > height / 2
+        valueParsed.worldPosX < -CONSTANTS.WIDTH / 2 ||
+        valueParsed.worldPosX > CONSTANTS.WIDTH / 2 ||
+        valueParsed.worldPosY < -CONSTANTS.HEIGHT / 2 ||
+        valueParsed.worldPosY > CONSTANTS.HEIGHT / 2
       ) {
         redisClient.hdel(
           "bullet",
