@@ -49,12 +49,18 @@ const PixiComponent = ({ gameData }) => {
     const app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
-      backgroundColor: 0xffffff, // couleur de fond
+      transparent: true, // couleur de fond
     });
     const pixiContainer = pixiContainerRef.current;
     pixiContainer.appendChild(app.view);
 
-    const background = PIXI.Sprite.from("/just_background.png");
+    const texture = PIXI.Texture.from("test3.png");
+    const background = new PIXI.TilingSprite(
+      texture,
+      app.screen.width,
+      app.screen.height
+    );
+    background.tileScale.set(1); // Réglez l'échelle de la tuile sur 1 pour conserver la taille d'origine
     app.stage.addChild(background);
 
     // Création du joueur
@@ -210,6 +216,7 @@ const PixiComponent = ({ gameData }) => {
       ) {
         player.worldPos.x =
           player.worldPos.x + cursorX * CONSTANTS.PLAYER_SPEED;
+        background.tilePosition.x -= cursorX * speed;
       }
       if (
         player.worldPos.y + cursorY * CONSTANTS.PLAYER_SPEED <
@@ -219,6 +226,7 @@ const PixiComponent = ({ gameData }) => {
       ) {
         player.worldPos.y =
           player.worldPos.y + cursorY * CONSTANTS.PLAYER_SPEED;
+        background.tilePosition.y -= cursorY * speed;
       }
 
       //Envoie la postion du joueur au serveur
