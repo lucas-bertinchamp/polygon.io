@@ -124,7 +124,7 @@ const PixiComponent = ({ gameData }) => {
           }
           let dx = Math.cos(theta_0 + theta * i);
           let dy = Math.sin(theta_0 + theta * i);
-          let radius = (1.5 * player.sprite.height) / 2;
+          let radius = player.sprite.height;
 
           let key = JSON.stringify({ id: socketClient.id, num: totalBullets });
 
@@ -202,9 +202,9 @@ const PixiComponent = ({ gameData }) => {
     let healthBubbleList = [];
     healthBubbleUtils.initialization();
 
-    app.ticker.maxFPS = 100;
-    // Boucle du jeu
-    app.ticker.add(() => {
+    // ---------------------- Joueur ----------------------
+
+    setInterval(() => {
       //Actualise la position du joueur dans le monde
       const cursorX = (mousePos.x - app.screen.width / 2) / app.screen.width;
       const cursorY = (mousePos.y - app.screen.height / 2) / app.screen.height;
@@ -243,7 +243,13 @@ const PixiComponent = ({ gameData }) => {
           ammo: 0,
         });
       }
+    }, 1000 / 60);
 
+    // ---------------------- Boucle du jeu ----------------------
+
+    app.ticker.maxFPS = 100;
+    // Boucle du jeu
+    app.ticker.add(() => {
       // Enlève les joueurs de l'écran puis actualise leur position
       playerList.forEach((otherPlayer) => {
         if (otherPlayer.sprite.x !== null && otherPlayer.sprite.y !== null) {
