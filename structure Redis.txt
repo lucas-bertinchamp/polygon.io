@@ -6,4 +6,4 @@ player : dictionnaire ayant pour clé l'id du socket du joueur. Chaque élément
 
 message : liste de messages dont les plus récents sont sur la gauche
 
-bullets : dictionnaire ayant pour clé l'id du socket du joueur concaténé au numéro de la bullet. Chaque élément est de la forme {dX, dY, speed, worldPosX, worldPosY, color, dmgValue}
+bullets : dictionnaire ayant pour clé l'id du socket du joueur concaténé au numéro de la bullet. Chaque élément est de la forme {playerId, num, worldPosX, worldPosY, color, dmgValue}

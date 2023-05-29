@@ -19,29 +19,6 @@ function Game() {
     playerColor: storedPlayerColor,
   };
 
-  // Minimap data
-  const [player, setPlayer] = useState({
-    top: "50%",
-    left: "50%",
-    backgroundColor: storedPlayerName,
-  });
-  const [objects, setObjects] = useState([
-    {
-      id: 1,
-      position: { top: "30%", left: "40%", backgroundColor: "blue" },
-    },
-    {
-      id: 2,
-      position: { top: "60%", left: "70%", backgroundColor: "orange" },
-    },
-    // Add more objects as needed
-  ]);
-
-  const updateMinimap = (newPlayer, newObjects) => {
-    setPlayer((prevData) => (newPlayer ? newPlayer : prevData));
-    setObjects((prevData) => (newObjects ? newObjects : prevData));
-  };
-
   return (
     <div className={styles.container}>
       <Head>
@@ -60,7 +37,6 @@ function Game() {
         />
       </Head>
       <PixiComponent gameData={gameData} />
-      <Minimap player={player} objects={objects} />
     </div>
   );
 }
