@@ -104,7 +104,7 @@ io.on("connection", (socket) => {
       if (err) {
         console.log(err);
       } else {
-        socket.emit("server:initialXpBubble", res);
+        socket.emit("server:initialXpBubble", compressData(res));
       }
     });
   });

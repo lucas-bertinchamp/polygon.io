@@ -1,6 +1,11 @@
 import XpBubble from "../XpBubble";
 import pako from "pako";
 
+const decompressData = (data) => {
+  let decompressedData = pako.inflate(data, { to: "string" });
+  return JSON.parse(decompressedData);
+};
+
 const XpBubbleUtils = ({ socket }) => {
   let clientSocket = socket;
   let xpBubbleList = new Set();
@@ -15,6 +20,7 @@ const XpBubbleUtils = ({ socket }) => {
   });
 
   clientSocket.on("server:initialXpBubble", (message) => {
+    message = decompressData(message);
     message.forEach((xpBubble) => {
       xpBubbleList.add(xpBubble);
     });
