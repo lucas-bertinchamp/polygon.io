@@ -20,4 +20,4 @@ Le client next.js s'occupe du front et des composants. La librairie pixi.js perm
 
 Le serveur node.js s'occupe de la logique du jeu et de la communication avec le client. Il est hébergé sur Heroku. Il utilise la librairie socket.io pour la communication en temps réel avec le client, ainsi que la librairie WebWorker pour le parallélisme.
 
-La base de données (clé-valeur) Redis s'occupe de stocker les données des joueurs et des parties. Elle est hébergée sur Heroku. La base de données . Les données sont compressées grâce à la librairie pako. L'utilisation de la base de données Redis permet de stocker les données en mémoire vive, ce qui permet d'accéder aux données plus rapidement.
+La base de données (clé-valeur) Redis s'occupe de stocker les données des joueurs et des parties. Elle est hébergée sur Heroku. La base de données . Les données sont compressées grâce à la librairie [pako](https://www.npmjs.com/package/pako). L'utilisation de la base de données Redis permet de stocker les données en mémoire vive, ce qui permet d'accéder aux données plus rapidement.
