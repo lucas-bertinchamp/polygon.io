@@ -1,38 +1,21 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# [polygon.io](https://polygonio.herokuapp.com/)
 
-## Getting Started
+## Présentation du jeu
 
-First, run the development server:
+polygon.io est un jeu de tir multijoueur inspiré d'agar.io. Le but du jeu est de détruire les autres joueurs en évoluant grâce à l'expérience. Les niveaux de joueurs sont représentés par des polygones : plus le joueur est haut niveau, plus il a de vies et de côtés donc plus son nombre de tir est élevé.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+![logo](public/sprites/logo/logo.png)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Structure du projet
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+Le projet est divisé en trois parties :
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+-   le client next.js avec une librairie pixi.js ;
+-   le serveur node.js herbergé sur Heroku ;
+-   la base de données Redis.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+Le client next.js s'occupe du front et des composants. La librairie pixi.js permet de gérer le rendu du jeu.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Le serveur node.js s'occupe de la logique du jeu et de la communication avec le client. Il est hébergé sur Heroku. Il utilise la librairie socket.io pour la communication en temps réel avec le client, ainsi que la librairie WebWorker pour le parallélisme.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+La base de données (clé-valeur) Redis s'occupe de stocker les données des joueurs et des parties. Elle est hébergée sur Heroku. La base de données . Les données sont compressées grâce à la librairie pako. L'utilisation de la base de données Redis permet de stocker les données en mémoire vive, ce qui permet d'accéder aux données plus rapidement.
