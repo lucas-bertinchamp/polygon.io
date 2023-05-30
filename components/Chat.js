@@ -15,6 +15,7 @@ const Chat = ({ socket }) => {
     setMessages((prevMessages) => [...messages].reverse());
   });
 
+  /*Appelée suite à la submission d'un message, cette fonction permet d'en identifier les propriétés pour les envoyer au serveur*/
   const handleSubmit = (e) => {
     e.preventDefault();
     const message = e.target.message.value;

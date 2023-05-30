@@ -5,6 +5,10 @@ const HealthBubbleUtils = ({ socket }) => {
   let healthBubbleList = new Set();
   let onBoardMap = new Map();
 
+  /*
+  Si le serveur demande par message via la socket de supprimer une bulle de vie, le client la supprime de sa liste.
+  Les lignes suivantes permettent par un raisonnement analogue de créer une bulle de vie, ou plusieurs à l'initialisation.
+  */
   clientSocket.on("server:deleteHealthBubble", (message) => {
     healthBubbleList.delete(message);
   });
@@ -19,10 +23,15 @@ const HealthBubbleUtils = ({ socket }) => {
     });
   });
 
+  //Demande au serveur d'initialiser des bulles de vie
   const initialization = () => {
     clientSocket.emit("client:initialHealthBubble");
   };
 
+  /*
+  Lorsque le client supprime une bulle de vie, il identifie ses propriétés, la supprime en local de sa liste
+  puis envoie un message au serveur par la socket pour qu'il la supprime chez les autres joueurs. 
+  */
   const deleteHealthBubble = (message) => {
     let stringBubble =
       JSON.stringify(message.worldPos.x) +
@@ -36,6 +45,10 @@ const HealthBubbleUtils = ({ socket }) => {
     return healthBubbleList;
   };
 
+  /*
+  Récupére la liste des bulles de vie à afficher sur l'écran du joueur.
+  Pour cela détermine leur distance au joueur puis crée les éléments effectifs (avec sprite) à afficher.
+  */
   const getPrintableHealthBubbleList = (player, width, height) => {
     let onBoardMap2 = new Map();
     for (let b of healthBubbleList) {

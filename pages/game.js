@@ -8,7 +8,9 @@ import PixiComponent from "@/components/PixiComponent";
 function Game() {
   let storedPlayerName = "";
   let storedPlayerColor = "";
-
+  /*
+  Récupère le nom et la couleur choisis par le joueur depuis l'espace de stockage de la session.
+  */
   if (typeof sessionStorage !== "undefined") {
     storedPlayerName = sessionStorage.getItem("playerName");
     storedPlayerColor = sessionStorage.getItem("playerColor");

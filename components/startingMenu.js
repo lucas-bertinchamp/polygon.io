@@ -3,10 +3,19 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
+/*
+Cette fonction met en place le menu principal du jeu. 
+Dans ce menu le joueur choisit son nom et sa couleur.
+Quand les deux champs ont été modifiés, il peut envoyer le formulaire et accéder au jeu.
+*/
 const StartingMenu = () => {
   const [playerName, setPlayerName] = useState("");
   const [playerColor, setPlayerColor] = useState("");
 
+  /*
+  Permet de récupérer le nom et la couleur choisis depuis l'espace de stockage de la session
+  par le joueur et stocke ces données dans des variables chez le client.
+  */
   useEffect(() => {
     const storedPlayerName = sessionStorage.getItem("playerName");
     const storedPlayerColor = sessionStorage.getItem("playerColor");
@@ -20,7 +29,7 @@ const StartingMenu = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission or other logic
+    // Gère les erreurs de submission du sondage
   };
 
   const handleNameChange = (e) => {
@@ -33,6 +42,7 @@ const StartingMenu = () => {
     sessionStorage.setItem("playerColor", e.target.value);
   };
 
+  
   function generateRandomNickname() {
     const adjectives = [
       "Crazy",
@@ -52,7 +62,11 @@ const StartingMenu = () => {
       "Gamer",
       "Master",
     ];
-
+  
+  /*
+  Pour faciliter la création de pseudonymes aléatoires, on met bout à bout un nom et
+  un adjectif tirés de deux listes de mots.
+  */
     const randomAdjective =
       adjectives[Math.floor(Math.random() * adjectives.length)];
     const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
@@ -62,6 +76,10 @@ const StartingMenu = () => {
     setPlayerName(randomNickname);
   }
 
+  /*
+  Quand le sondage est soumis, si les deux champs ont été initialisés,
+  l'accès au jeu est effectué par validation du formulaire (pression d'un bouton).
+  */
   const renderPlayLink = () => {
     if (playerName && playerColor) {
       return (

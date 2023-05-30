@@ -26,7 +26,7 @@ const httpServer = createServer((req, res) => {
   });
 
   if (pathname === "/") {
-    // Rendre la page d'accueil
+    // Rendition de la page d'accueil
     app.render(req, res, "/", query);
   }
 });
@@ -40,6 +40,7 @@ const workerHealth = new Worker("./server/workerHealth.js");
 const workerPlayer = new Worker("./server/workerPlayer.js");
 const workerBullet = new Worker("./server/workerBullet.js");
 
+// Lorsqu'un worker détecte un changement à effectuer, il en informe le serveur qui envoie les données aux clients
 workerXp.on("message", (data) => {
   io.emit("server:addXpBubble", data);
 });
@@ -104,7 +105,7 @@ io.on("connection", (socket) => {
       if (err) {
         console.log(err);
       } else {
-        socket.emit("server:initialXpBubble", compressData(res));
+        socket.emit("server:initialXpBubble", compressData(res)); //Les bulles d'expérience étant nombreuses, elles sont compressées avant d'être envoyées au client
       }
     });
   });
@@ -258,6 +259,9 @@ const sendLeaderboard = () => {
   });
 };
 
+/*
+Compresse les données au moyen de la librairie pako.
+*/
 function compressData(data) {
   const compressedData = pako.deflate(JSON.stringify(data));
   return compressedData;

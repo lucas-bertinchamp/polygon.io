@@ -3,7 +3,11 @@ import style from "@/styles/Leaderboard.module.css";
 
 const Leaderboard = ({ socket }) => {
   let [leaderboardData, setLeaderboardData] = useState([]);
-  // Gestion du leaderboard
+  /*
+  Gestion du leaderboard
+  Toutes les données du leaderboard sont envoyées du serveur au client à chaque appel.
+  Le client met à jour ses données puis affiche les 10 meilleurs joueurs et leur score.
+  */
 
   socket.on("leaderboard", (data) => {
     setLeaderboardData(data);
