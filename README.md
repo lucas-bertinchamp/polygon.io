@@ -2,9 +2,11 @@
 
 ## Présentation du jeu
 
-polygon.io est un jeu de tir multijoueur inspiré d'agar.io. Le but du jeu est de détruire les autres joueurs en évoluant grâce à l'expérience. Les niveaux de joueurs sont représentés par des polygones : plus le joueur est haut niveau, plus il a de vies et de côtés donc plus son nombre de tir est élevé.
+polygon.io est un jeu de tir multijoueur inspiré d'agar.io.
 
-![logo](public/sprites/logo/logo.png)
+Le but du jeu est de détruire les autres joueurs en évoluant grâce à l'expérience. Les niveaux de joueurs sont représentés par des polygones : plus le joueur est haut niveau, plus il a de vies et de côtés donc plus son nombre de tir est élevé.
+
+<div align="center"><img src="public/sprites/logo/logo.png"></div>
 
 ## Structure du projet
 
