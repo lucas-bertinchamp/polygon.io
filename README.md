@@ -12,9 +12,9 @@ Le but du jeu est de détruire les autres joueurs en évoluant grâce à l'expé
 
 Le projet est divisé en trois parties :
 
--   le client next.js avec une librairie pixi.js ;
--   le serveur node.js herbergé sur Heroku ;
--   la base de données Redis.
+-   le client [next.js](https://nextjs.org/) avec une librairie [pixi.js](https://pixijs.com/) ;
+-   le serveur [node.js](https://nodejs.org/en) avec une communication client/server par [socket.io](https://socket.io/) et du parrallélisme avec [Worker threads](https://nodejs.org/api/worker_threads.html) herbergé sur [Heroku](https://www.heroku.com/) ;
+-   la base de données [Redis](https://redis.io/) hergée sur Heroku.
 
 Le client next.js s'occupe du front et des composants. La librairie pixi.js permet de gérer le rendu du jeu.
 
