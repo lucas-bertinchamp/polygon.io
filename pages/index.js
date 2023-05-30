@@ -2,8 +2,17 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "@/styles/Home.module.css";
 import StartingMenu from "../components/startingMenu";
+import { PrismaClient } from '@prisma/client'
+
+/*
+const prisma = new PrismaClient({
+  log: [{ level: 'query', emit: 'event' }],
+})
+*/
 
 export default function Home() {
+  //const res = prisma.user.findMany();
+  //console.log(res);
   return (
     <>
       <Head>
@@ -22,6 +31,7 @@ export default function Home() {
         />
       </Head>
       <main>
+
         <StartingMenu />
       </main>
     </>
