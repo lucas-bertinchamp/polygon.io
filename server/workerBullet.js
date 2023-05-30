@@ -4,7 +4,6 @@ import CONSTANTS from "../constants.js";
 
 import { workerData, parentPort } from "worker_threads";
 
-console.log(CONSTANTS.BULLET_SPEED);
 
 parentPort.on("message", (msg) => {
   sendBullet();

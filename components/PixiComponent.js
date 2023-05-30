@@ -93,21 +93,18 @@ const PixiComponent = ({ gameData }) => {
       mousePos.x = e.clientX;
       mousePos.y = e.clientY;
     };
-    /*
-    // Evenement déclenché si on clique
-    window.onkeydown = (e) => {
-      e.preventDefault();
-      console.log(document.activeElement.id === "chat");
-      // Vérifie que l'on est pas dans le chat
-      if (document.activeElement.id !== "chat") {
-        if (e.code === "Space") {
-          creerProjectile();
-        }
-      } else {
-        return;
-      }
-    };*/
 
+    // Evenement déclenché si on appuie sur espace
+    window.onkeyup = (e) => {
+      e.preventDefault();
+      console.log(document.activeElement.tagName !== "INPUT");
+      // Vérifie que l'on est pas dans le chat
+      if (e.code === "Space" && document.activeElement.tagName !== "INPUT") {
+        creerProjectile();
+      }
+    };
+
+    // Evenement déclenché si on clique
     window.onclick = (e) => {
       e.preventDefault();
       creerProjectile();
