@@ -3,13 +3,13 @@ import * as PIXI from "pixi.js";
 const Projectile = (
   playerId,
   num,
-  dX,
-  dY,
+  dX, //déplacement élémentaire en x par unité de vitesse
+  dY, //déplacement élémentaire en y par unité de vitesse
   worldPosX,
   worldPosY,
-  speed,
+  speed, //vitesse de déplacement dans la direction du tir
   color,
-  dmgValue
+  dmgValue //nombre de points de vie ôtés à l'éventuelle cible touchée
 ) => {
   const missile_Sprite = PIXI.Sprite.from("/sprites/bullet.png");
 

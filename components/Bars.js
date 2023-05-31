@@ -6,6 +6,9 @@ const Bars = ({ barsData }) => {
     updateBars();
   }, [barsData]);
 
+  /*
+  Récupère et met à jour pour chaque jauge l'ensemble de ses données depuis le pixi component.
+  */
   const updateBars = () => {
     barsData.forEach((bar) => {
       const { id, value, maxValue, color, name } = bar;

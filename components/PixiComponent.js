@@ -26,7 +26,7 @@ const PixiComponent = ({ gameData }) => {
 
   let dataPlayerName = gameData.playerName;
   let dataPlayerColor = gameData.playerColor;
-  let playerColorCoded = dataPlayerColor.replace("#", "0x");
+  let playerColorCoded = dataPlayerColor.replace("#", "0x"); // Changement du format de la couleur pour PIXI (format précédent issu de la sélection de couleur dans le menu)
 
   // Minimap data
   const [player, setPlayer] = useState();
@@ -39,15 +39,15 @@ const PixiComponent = ({ gameData }) => {
   };
 
   const pixiContainerRef = useRef(null);
-  const xpNeeded = [0, 20, 40, 80, 160, 320, 200000]; // 0 to start at index 1 for level 1
-  const healthByLevel = [0, 100, 120, 140, 160, 180, 200]; // 0 to start at index 1 for level 1
+  const xpNeeded = [0, 20, 40, 80, 160, 320, 200000]; // Pour chaque niveau, plafond d'expérience requis pour progresser (niveau 0 jamais utilisé en pratique)
+  const healthByLevel = [0, 100, 120, 140, 160, 180, 200]; // Maximum de points de vie pour chaque niveau
 
-  let totalBullets = 0;
+  let totalBullets = 0; //Nombre de munitions
 
   const mousePos = { x: 0, y: 0 };
 
   useEffect(() => {
-    // Créer une application PIXI
+    // Crée une application PIXI
     const app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
@@ -62,7 +62,7 @@ const PixiComponent = ({ gameData }) => {
       app.screen.width,
       app.screen.height
     );
-    background.tileScale.set(1); // Réglez l'échelle de la tuile sur 1 pour conserver la taille d'origine
+    background.tileScale.set(1); // Régle l'échelle de la tuile sur 1 pour conserver la taille d'origine
     app.stage.addChild(background);
 
     // Création du joueur
@@ -81,30 +81,30 @@ const PixiComponent = ({ gameData }) => {
     app.stage.addChild(player.playerNameText);
 
     setInterval(() => {
-      // Regagne une balle
+      // Regagne une munition toutes les 100ms si le joueur est de niveau 2 ou plus
       if (player.level > 1 && player.ammo < 100) {
         player.ammo += 0.5;
         barsUtils.setBarValue(3, player.ammo);
       }
     }, 100);
 
-    // Evenement déclenché si la position de la souris change
+    // Evènement déclenché si la position de la souris change
     window.onmousemove = (e) => {
       mousePos.x = e.clientX;
       mousePos.y = e.clientY;
     };
 
-    // Evenement déclenché si on appuie sur espace
+    // Evènement déclenché si l'on appuie sur la barre d'espace
     window.onkeyup = (e) => {
       e.preventDefault();
       console.log(document.activeElement.tagName !== "INPUT");
-      // Vérifie que l'on est pas dans le chat
+      // Vérifie que l'on n'est pas dans le chat
       if (e.code === "Space" && document.activeElement.tagName !== "INPUT") {
         creerProjectile();
       }
     };
 
-    // Evenement déclenché si on clique
+    // Evènement déclenché si l'on clique gauche
     window.onclick = (e) => {
       e.preventDefault();
       creerProjectile();
@@ -139,16 +139,21 @@ const PixiComponent = ({ gameData }) => {
           };
 
           let data = JSON.stringify(value);
-          // Envoyer la bullets au server
+          // Envoie la balle tirée au server
           socketClient.emit("addBullet", { key: key, value: data });
           totalBullets++;
         }
-        // Enlever une balle au joueur
+        // Enlève la balle de la réserve du joueur
         player.ammo -= 5;
         barsUtils.setBarValue(3, player.ammo);
       }
     };
 
+    /*
+    Lorsqu'une personne se connecte, le serveur lui envoie des données compressées
+    contenant toutes les informations sur l'état du monde.
+    Cette fonction décompresse ces données aux moyens de la librairie pako. 
+    */
     function decompressData(compressedData) {
       const inflatedData = pako.inflate(compressedData, { to: "string" });
       return JSON.parse(inflatedData);
@@ -202,7 +207,7 @@ const PixiComponent = ({ gameData }) => {
       playerList = temporaryPlayers;
     });
 
-    // Initialiser les bulles
+    // Initialise les différentes bulles
     let xpBubbleList = [];
     xpBubbleUtils.initialization();
     let healthBubbleList = [];

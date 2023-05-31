@@ -13,17 +13,17 @@ const Player = (
 ) => {
   worldPosX = worldPosX;
   worldPosY = worldPosY;
-
+  //L'apparence du joueur est reconstituée à partir de ses propriétés
   let spritePlayer = chooseSprite(level);
   spritePlayer.tint = color;
   spritePlayer.x = posX;
   spritePlayer.y = posY;
 
   const playerNameText = new PIXI.Text(name, {
-    fill: 0x000000, // text color
+    fill: 0x000000, // couleur du texte
   });
 
-  playerNameText.anchor.set(0.5); // center the text
+  playerNameText.anchor.set(0.5); // le texte est centré sur le joueur
   playerNameText.position.set(spritePlayer.x, spritePlayer.y - 55);
 
   return {
